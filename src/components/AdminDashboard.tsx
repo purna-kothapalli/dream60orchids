@@ -515,20 +515,20 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
             </div>
 
             {/* Master Auctions List */}
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-4">
               {masterAuctions.map((auction) => (
                 <div
                   key={auction.master_id}
-                  className="bg-gradient-to-br from-white via-purple-50/30 to-white rounded-2xl shadow-xl p-8 border-2 border-purple-300 hover:shadow-2xl transition-all duration-300"
+                  className="bg-gradient-to-br from-white via-purple-50/30 to-white rounded-xl shadow-lg p-6 border-2 border-purple-300 hover:shadow-xl transition-all duration-300"
                 >
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center gap-4">
-                      <div className="p-4 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl shadow-lg">
-                        <Trophy className="w-8 h-8 text-white" />
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg shadow-md">
+                        <Trophy className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-2xl font-bold text-purple-900">
-                          Master Auction {auction.master_id.slice(0, 8)}
+                        <h3 className="text-xl font-bold text-purple-900">
+                          Master Auction
                         </h3>
                         <p className="text-sm text-purple-600 flex items-center gap-2 mt-1">
                           <Calendar className="w-4 h-4" />
@@ -537,7 +537,7 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
                       </div>
                     </div>
                     <span
-                      className={`px-5 py-2.5 rounded-full font-bold text-sm shadow-lg ${
+                      className={`px-4 py-2 rounded-full font-bold text-sm shadow-md ${
                         auction.isActive
                           ? 'bg-gradient-to-r from-green-500 to-green-600 text-white'
                           : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white'
@@ -547,36 +547,36 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl p-4 border border-purple-300 shadow-md">
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg p-3 border border-purple-300 shadow-sm">
                       <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">Daily Auctions</p>
-                      <p className="text-3xl font-bold text-purple-900">
+                      <p className="text-2xl font-bold text-purple-900">
                         {auction.totalAuctionsPerDay}
                       </p>
                     </div>
-                    <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl p-4 border border-blue-300 shadow-md">
+                    <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg p-3 border border-blue-300 shadow-sm">
                       <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-1">Configured</p>
-                      <p className="text-3xl font-bold text-blue-900">
+                      <p className="text-2xl font-bold text-blue-900">
                         {auction.dailyAuctionConfig?.length || 0}
                       </p>
                     </div>
                   </div>
 
                   {auction.dailyAuctionConfig && auction.dailyAuctionConfig.length > 0 && (
-                    <div className="mt-6">
-                      <h4 className="font-bold text-lg text-purple-900 mb-4 flex items-center gap-2">
-                        <Clock className="w-5 h-5" />
+                    <div className="mt-4">
+                      <h4 className="font-bold text-base text-purple-900 mb-3 flex items-center gap-2">
+                        <Clock className="w-4 h-4" />
                         Auction Slots
                       </h4>
-                      <div className="space-y-3">
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
                         {auction.dailyAuctionConfig.map((config) => (
                           <div
                             key={config.auctionNumber}
-                            className="group bg-white rounded-xl overflow-hidden border-2 border-purple-200 shadow-lg hover:shadow-xl hover:border-purple-400 transition-all duration-300 hover:-translate-y-0.5"
+                            className="group bg-white rounded-lg overflow-hidden border border-purple-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all duration-300"
                           >
                             <div className="flex flex-col sm:flex-row">
                               {/* Image Section */}
-                              <div className="relative w-full sm:w-48 h-32 sm:h-auto flex-shrink-0">
+                              <div className="relative w-full sm:w-32 h-24 sm:h-auto flex-shrink-0">
                                 {config.imageUrl ? (
                                   <div className="relative h-full bg-gradient-to-br from-purple-100 to-purple-200 overflow-hidden">
                                     <img
@@ -590,28 +590,28 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
                                   </div>
                                 ) : (
                                   <div className="relative h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
-                                    <Trophy className="w-12 h-12 text-purple-400" />
+                                    <Trophy className="w-8 h-8 text-purple-400" />
                                   </div>
                                 )}
-                                <div className="absolute top-2 left-2 bg-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                                <div className="absolute top-2 left-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
                                   #{config.auctionNumber}
                                 </div>
                               </div>
 
                               {/* Content Section */}
-                              <div className="flex-1 p-4 sm:p-5">
-                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                              <div className="flex-1 p-3">
+                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                                   {/* Left: Name & Time */}
                                   <div className="flex-1">
-                                    <h5 className="font-bold text-lg text-purple-900 mb-2">
+                                    <h5 className="font-bold text-base text-purple-900 mb-1">
                                       {config.auctionName}
                                     </h5>
-                                    <div className="flex items-center gap-2 text-purple-600 mb-3">
-                                      <Clock className="w-4 h-4" />
-                                      <span className="font-semibold">{config.TimeSlot}</span>
+                                    <div className="flex items-center gap-2 text-purple-600 mb-2">
+                                      <Clock className="w-3 h-3" />
+                                      <span className="font-semibold text-sm">{config.TimeSlot}</span>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-2">
-                                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                      <span className={`px-2 py-1 rounded-full text-xs font-bold ${
                                         config.Status === 'LIVE' ? 'bg-green-100 text-green-700' :
                                         config.Status === 'UPCOMING' ? 'bg-blue-100 text-blue-700' :
                                         config.Status === 'COMPLETED' ? 'bg-gray-100 text-gray-700' :
@@ -623,10 +623,10 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
                                   </div>
 
                                   {/* Right: Prize Value */}
-                                  <div className="flex items-center gap-4 sm:flex-col sm:items-end">
+                                  <div className="flex items-center gap-3 sm:flex-col sm:items-end">
                                     <div className="text-left sm:text-right">
                                       <p className="text-xs text-purple-600 font-semibold mb-1">Prize Value</p>
-                                      <p className="text-2xl font-bold text-purple-900">
+                                      <p className="text-lg font-bold text-purple-900">
                                         ₹{config.prizeValue.toLocaleString()}
                                       </p>
                                     </div>
@@ -643,19 +643,19 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
               ))}
 
               {masterAuctions.length === 0 && (
-                <div className="bg-gradient-to-br from-white via-purple-50/30 to-white rounded-2xl shadow-xl p-16 border-2 border-purple-300 text-center">
-                  <div className="bg-purple-100 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
-                    <Trophy className="w-12 h-12 text-purple-600" />
+                <div className="bg-gradient-to-br from-white via-purple-50/30 to-white rounded-xl shadow-lg p-12 border-2 border-purple-300 text-center">
+                  <div className="bg-purple-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                    <Trophy className="w-10 h-10 text-purple-600" />
                   </div>
-                  <h3 className="text-2xl font-bold text-purple-900 mb-3">
+                  <h3 className="text-xl font-bold text-purple-900 mb-2">
                     No Master Auctions Yet
                   </h3>
-                  <p className="text-purple-600 mb-6 text-lg">
+                  <p className="text-purple-600 mb-4 text-base">
                     Create your first master auction to get started
                   </p>
                   <button
                     onClick={() => setShowCreateAuction(true)}
-                    className="px-8 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-xl"
+                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-xl"
                   >
                     Create Master Auction
                   </button>

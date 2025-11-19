@@ -233,6 +233,53 @@ router.get('/', controller.getAllMasterAuctions);
 
 /**
  * @openapi
+ * /api/v1/master-auctions/all-with-config:
+ *   get:
+ *     tags:
+ *       - MasterAuction
+ *     summary: Get all auctions with daily config (NO PARAMETERS)
+ *     description: Returns all daily auction configs from all active master auctions. No input parameters required. Sorted by time slot.
+ *     responses:
+ *       '200':
+ *         description: OK - Returns all daily auction configs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     allOf:
+ *                       - $ref: '#/components/schemas/DailyAuction'
+ *                       - type: object
+ *                         properties:
+ *                           master_id:
+ *                             type: string
+ *                             description: Master auction ID this config belongs to
+ *                           masterAuctionCreatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       example: 10
+ *       '500':
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/all-with-config', controller.getAllAuctionsWithDailyConfig);
+
+/**
+ * @openapi
  * /api/v1/master-auctions:
  *   post:
  *     tags:

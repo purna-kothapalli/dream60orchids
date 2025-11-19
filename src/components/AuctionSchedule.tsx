@@ -1,16 +1,48 @@
-
 import { Clock, Calendar, Trophy, Sparkles, IndianRupee, Star, Zap, Lock, Unlock, Radio, PlayCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { useState, useEffect } from 'react';
+
+interface AuctionConfig {
+  auctionNumber: number;
+  auctionId: string;
+  TimeSlot: string;
+  auctionName: string;
+  imageUrl?: string;
+  prizeValue: number;
+  Status: 'LIVE' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED';
+  master_id: string;
+}
 
 export function AuctionSchedule() {
+  const [auctions, setAuctions] = useState<AuctionConfig[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const now = new Date();
   const currentHour = now.getHours();
-  
-  // Indian products with real images and Indian prices
-  const prizes = [
+
+  useEffect(() => {
+    const fetchAuctions = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/v1/master-auctions/all-with-config');
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          setAuctions(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching auctions:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAuctions();
+  }, []);
+
+  // Fallback prizes for when no data is available
+  const fallbackPrizes = [
     { 
       name: 'iPhone 15 Pro Max 256GB', 
       value: 134900,
@@ -21,93 +53,89 @@ export function AuctionSchedule() {
       value: 124999,
       image: 'https://images.unsplash.com/photo-1627609834360-74948f361335?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxTYW1zdW5nJTIwR2FsYXh5JTIwc21hcnRwaG9uZXxlbnwxfHx8fDE3NjI3OTk0NTF8MA&ixlib=rb-4.1.0&q=80&w=1080'
     },
-    { 
-      name: 'OnePlus 12 5G', 
-      value: 64999,
-      image: 'https://images.unsplash.com/photo-1628582091924-296b8ec1fffe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxPbmVQbHVzJTIwc21hcnRwaG9uZXxlbnwxfHx8fDE3NjI3MDUxNDV8MA&ixlib=rb-4.1.0&q=80&w=1080'
-    },
-    { 
-      name: 'Apple Watch Ultra 2', 
-      value: 89900,
-      image: 'https://images.unsplash.com/photo-1687078426457-89ce2b562eaf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxBcHBsZSUyMFdhdGNoJTIwbHV4dXJ5fGVufDF8fHx8MTc2Mjc5OTQ1MXww&ixlib=rb-4.1.0&q=80&w=1080'
-    },
-    { 
-      name: 'Sony WH-1000XM5 Headphones', 
-      value: 29990,
-      image: 'https://images.unsplash.com/photo-1761005654347-f5907893edb7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxTb255JTIwaGVhZHBob25lcyUyMHByZW1pdW18ZW58MXx8fHwxNzYyNzk5NDUxfDA&ixlib=rb-4.1.0&q=80&w=1080'
-    },
-    { 
-      name: 'iPad Pro 12.9" M2', 
-      value: 109900,
-      image: 'https://images.unsplash.com/photo-1702479744193-5c5056cf0436?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpUGFkJTIwdGFibGV0JTIwZGV2aWNlfGVufDF8fHx8MTc2MjcxMzIzN3ww&ixlib=rb-4.1.0&q=80&w=1080'
-    },
-    { 
-      name: 'Apple AirPods Pro 2', 
-      value: 24900,
-      image: 'https://images.unsplash.com/photo-1574920164507-e651b363da83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxBaXJQb2RzJTIwZWFyYnVkcyUyMHdpcmVsZXNzfGVufDF8fHx8MTc2Mjc5OTQ1Mnww&ixlib=rb-4.1.0&q=80&w=1080'
-    },
-    { 
-      name: 'Samsung Galaxy Watch 6', 
-      value: 31999,
-      image: 'https://images.unsplash.com/photo-1719075596884-2020f827a8dd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxTYW1zdW5nJTIwc21hcnR3YXRjaCUyMG1vZGVybnxlbnwxfHx8fDE3NjI3OTk0NTN8MA&ixlib=rb-4.1.0&q=80&w=1080'
-    },
-    { 
-      name: 'JBL Boombox 3 Speaker', 
-      value: 34999,
-      image: 'https://images.unsplash.com/photo-1687363251749-9e9c7cffc171?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxKQkwlMjBzcGVha2VyJTIwYmx1ZXRvb3RofGVufDF8fHx8MTc2Mjc5OTQ1M3ww&ixlib=rb-4.1.0&q=80&w=1080'
-    },
-    { 
-      name: 'Sony WF-1000XM5 Earbuds', 
-      value: 19990,
-      image: 'https://images.unsplash.com/photo-1762553159827-7a5d2167b55d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aXJlbGVzcyUyMGVhcmJ1ZHMlMjBwcmVtaXVtfGVufDF8fHx8MTc2Mjc5OTQ1M3ww&ixlib=rb-4.1.0&q=80&w=1080'
-    }
   ];
   
-  const scheduleData = Array.from({ length: 10 }, (_, i) => {
-    const auctionHour = 9 + i;
-    const hour12 = auctionHour > 12 ? auctionHour - 12 : auctionHour;
-    const period = auctionHour >= 12 ? 'PM' : 'AM';
-    const timeStr = `${hour12}:00 ${period}`;
-    
-    let status = 'upcoming';
-    let winner = null;
-    
-    if (auctionHour < currentHour) {
-      status = 'completed';
-      winner = `Winner${Math.floor(Math.random() * 999)}`;
-    } else if (auctionHour === currentHour) {
-      status = 'active';
-    }
-    
-    return {
-      time: timeStr,
-      hour: auctionHour,
-      status,
-      prize: prizes[i],
-      winner
-    };
-  });
+  // Create schedule data from API or fallback
+  const scheduleData = auctions.length > 0 
+    ? auctions.map((auction, index) => {
+        const timeSlot = auction.TimeSlot || '12:00';
+        const [hourStr] = timeSlot.split(':');
+        const auctionHour = parseInt(hourStr, 10);
+        const hour12 = auctionHour > 12 ? auctionHour - 12 : auctionHour === 0 ? 12 : auctionHour;
+        const period = auctionHour >= 12 ? 'PM' : 'AM';
+        const timeStr = `${hour12}:${timeSlot.split(':')[1]} ${period}`;
+        
+        return {
+          time: timeStr,
+          hour: auctionHour,
+          status: auction.Status.toLowerCase(),
+          prize: {
+            name: auction.auctionName,
+            value: auction.prizeValue,
+            image: auction.imageUrl || fallbackPrizes[index % fallbackPrizes.length].image
+          },
+          winner: auction.Status === 'COMPLETED' ? `Winner${Math.floor(Math.random() * 999)}` : null
+        };
+      })
+    : Array.from({ length: 10 }, (_, i) => {
+        const auctionHour = 9 + i;
+        const hour12 = auctionHour > 12 ? auctionHour - 12 : auctionHour;
+        const period = auctionHour >= 12 ? 'PM' : 'AM';
+        const timeStr = `${hour12}:00 ${period}`;
+        
+        let status = 'upcoming';
+        let winner = null;
+        
+        if (auctionHour < currentHour) {
+          status = 'completed';
+          winner = `Winner${Math.floor(Math.random() * 999)}`;
+        } else if (auctionHour === currentHour) {
+          status = 'active';
+        }
+        
+        return {
+          time: timeStr,
+          hour: auctionHour,
+          status,
+          prize: fallbackPrizes[i % fallbackPrizes.length],
+          winner
+        };
+      });
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'completed': return 'bg-gradient-to-r from-purple-400 to-purple-500 text-white border-0';
-      case 'active': return 'bg-gradient-to-r from-violet-500 to-fuchsia-600 text-white border-0 shadow-lg shadow-purple-500/50';
+      case 'active':
+      case 'live': return 'bg-gradient-to-r from-violet-500 to-fuchsia-600 text-white border-0 shadow-lg shadow-purple-500/50';
       case 'upcoming': return 'bg-gradient-to-r from-purple-300 to-purple-400 text-white border-0';
       default: return 'bg-purple-400 text-white';
     }
   };
 
   const getStatusText = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'completed': return 'Completed';
-      case 'active': return 'Live Now';
+      case 'active':
+      case 'live': return 'Live Now';
       case 'upcoming': return 'Upcoming';
       default: return 'Unknown';
     }
   };
 
-
+  if (isLoading) {
     return (
+      <Card className="relative border-2 border-purple-300/60 backdrop-blur-2xl bg-gradient-to-br from-white/90 via-purple-50/60 to-violet-50/70 shadow-2xl">
+        <CardContent className="p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-700 mx-auto mb-4"></div>
+            <p className="text-purple-700 font-semibold">Loading auction schedule...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
     <div className="relative">
       <Card className="relative border-2 border-purple-300/60 backdrop-blur-2xl bg-gradient-to-br from-white/90 via-purple-50/60 to-violet-50/70 shadow-2xl overflow-hidden">
         {/* Contained animated background orbs - won't affect other components */}
@@ -173,7 +201,7 @@ export function AuctionSchedule() {
                 <Sparkles className="w-5 h-5 text-violet-600" />
               </CardTitle>
               <p className="text-purple-600 text-xs sm:text-sm mt-1">
-                10 premium auctions daily • 9 AM - 7 PM • 6 boxes per auction
+                {auctions.length > 0 ? `${auctions.length} premium auctions` : '10 premium auctions'} daily • 9 AM - 7 PM • 6 boxes per auction
               </p>
             </div>
           </div>
@@ -191,7 +219,7 @@ export function AuctionSchedule() {
                 <div 
                   className={`
                     relative overflow-hidden rounded-xl border-2 transition-all duration-300
-                    ${auction.status === 'active' 
+                    ${auction.status === 'active' || auction.status === 'live'
                       ? 'border-violet-300/70 bg-gradient-to-r from-violet-100/90 via-fuchsia-100/80 to-purple-100/70 shadow-xl shadow-purple-400/30 backdrop-blur-xl' 
                       : auction.status === 'completed'
                       ? 'border-purple-200/60 bg-gradient-to-r from-purple-50/80 to-violet-50/70 backdrop-blur-lg hover:shadow-lg'
@@ -203,7 +231,7 @@ export function AuctionSchedule() {
                   <div className="absolute inset-0 bg-white/30 backdrop-blur-sm pointer-events-none" />
                   
                   {/* Active auction pulse animation */}
-                  {auction.status === 'active' && (
+                  {(auction.status === 'active' || auction.status === 'live') && (
                     <motion.div
                       className="absolute inset-0 bg-gradient-to-r from-violet-400/20 to-fuchsia-400/20"
                       animate={{
@@ -229,7 +257,7 @@ export function AuctionSchedule() {
                           <div className="flex items-center gap-2">
                             <span className="text-base sm:text-lg font-bold text-purple-900">{auction.time}</span>
                             <Badge className={`${getStatusColor(auction.status)} text-xs flex items-center gap-2 rounded-xl`} >
-                              {auction.status === 'active' && (
+                              {(auction.status === 'active' || auction.status === 'live') && (
                                 <motion.div
                                   animate={{ scale: [1, 1.3, 1] }}
                                   transition={{ duration: 2.0, repeat: Infinity, ease: "easeInOut" }}
@@ -242,7 +270,7 @@ export function AuctionSchedule() {
                             </Badge>
                           </div>
                           <div className="text-xs text-purple-600 mt-0.5">
-                            Auction #{index + 1} of 10
+                            Auction #{index + 1} of {scheduleData.length}
                           </div>
                         </div>
                       </div>
@@ -290,7 +318,7 @@ export function AuctionSchedule() {
                     )}
                     
                     {/* Active auction CTA */}
-                    {auction.status === 'active' && (
+                    {(auction.status === 'active' || auction.status === 'live') && (
                       <motion.div 
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}

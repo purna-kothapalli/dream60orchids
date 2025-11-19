@@ -192,6 +192,51 @@ const getAllMasterAuctions = async (req, res) => {
 };
 
 /**
+ * GET /master-auctions/all-with-config
+ * No input parameters required
+ * Returns all master auctions with their daily config
+ */
+const getAllAuctionsWithDailyConfig = async (req, res) => {
+  try {
+    // Get all active master auctions with their daily configs
+    const masterAuctions = await MasterAuction.find({ isActive: true })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Flatten all daily auction configs from all master auctions
+    const allAuctions = [];
+    
+    for (const masterAuction of masterAuctions) {
+      if (masterAuction.dailyAuctionConfig && Array.isArray(masterAuction.dailyAuctionConfig)) {
+        for (const config of masterAuction.dailyAuctionConfig) {
+          allAuctions.push({
+            ...config,
+            master_id: masterAuction.master_id,
+            masterAuctionCreatedAt: masterAuction.createdAt,
+          });
+        }
+      }
+    }
+
+    // Sort by time slot
+    allAuctions.sort((a, b) => {
+      const timeA = a.TimeSlot || '00:00';
+      const timeB = b.TimeSlot || '00:00';
+      return timeA.localeCompare(timeB);
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: allAuctions,
+      meta: { total: allAuctions.length },
+    });
+  } catch (err) {
+    console.error('getAllAuctionsWithDailyConfig error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+/**
  * POST /master-auctions
  * Body: master auction payload (createdBy can be provided or will be taken from headers/query)
  */
@@ -270,5 +315,6 @@ const createMasterAuction = async (req, res) => {
 
 module.exports = {
   getAllMasterAuctions,
+  getAllAuctionsWithDailyConfig,
   createMasterAuction,
 };
