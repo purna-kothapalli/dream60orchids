@@ -635,6 +635,7 @@ interface DailyAuctionConfigItem {
   auctionNumber: number;
   TimeSlot: string;
   auctionName: string;
+  imageUrl: string;
   prizeValue: number;
   Status: 'UPCOMING' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
   maxDiscount: number;
@@ -659,6 +660,7 @@ const CreateMasterAuctionModal = ({
     auctionNumber: 1,
     TimeSlot: '12:00',
     auctionName: 'iPhone 14 Pro',
+    imageUrl: '',
     prizeValue: 65000,
     Status: 'UPCOMING',
     maxDiscount: 10,
@@ -678,6 +680,44 @@ const CreateMasterAuctionModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAuctionForm, setShowAuctionForm] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  // Auto-generate daily configs when totalAuctionsPerDay changes
+  const handleTotalAuctionsChange = (value: number) => {
+    const newTotal = Math.min(Math.max(value, 1), 24);
+    setFormData({ ...formData, totalAuctionsPerDay: newTotal });
+
+    // Generate daily auction configs automatically
+    const newDailyAuctions: DailyAuctionConfigItem[] = [];
+    for (let i = 0; i < newTotal; i++) {
+      const hour = 9 + i; // Start from 9:00 AM
+      const timeSlot = `${hour.toString().padStart(2, '0')}:00`;
+      
+      newDailyAuctions.push({
+        auctionNumber: i + 1,
+        TimeSlot: timeSlot,
+        auctionName: `Auction ${i + 1}`,
+        imageUrl: '',
+        prizeValue: 10000,
+        Status: 'UPCOMING',
+        maxDiscount: 10,
+        EntryFee: 'RANDOM',
+        minEntryFee: 20,
+        maxEntryFee: 80,
+        roundCount: 4,
+        roundConfig: [
+          {
+            round: 1,
+            duration: 15,
+            roundCutoffPercentage: 40,
+            topBidAmountsPerRound: 3,
+          },
+        ],
+      });
+    }
+    
+    setDailyAuctions(newDailyAuctions);
+    toast.success(`${newTotal} daily auction configs generated automatically`);
+  };
 
   const handleAddRound = () => {
     setCurrentAuction({
@@ -728,6 +768,7 @@ const CreateMasterAuctionModal = ({
       auctionNumber: dailyAuctions.length + 1,
       TimeSlot: '12:00',
       auctionName: '',
+      imageUrl: '',
       prizeValue: 0,
       Status: 'UPCOMING',
       maxDiscount: 10,
@@ -764,6 +805,11 @@ const CreateMasterAuctionModal = ({
 
     if (dailyAuctions.length === 0) {
       toast.error('Please add at least one daily auction');
+      return;
+    }
+
+    if (dailyAuctions.length !== formData.totalAuctionsPerDay) {
+      toast.error(`Expected ${formData.totalAuctionsPerDay} daily auctions, but got ${dailyAuctions.length}`);
       return;
     }
 
@@ -821,19 +867,20 @@ const CreateMasterAuctionModal = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-purple-700 mb-2">
-                  Total Auctions Per Day
+                  Total Auctions Per Day *
                 </label>
                 <input
                   type="number"
                   min="1"
                   max="24"
                   value={formData.totalAuctionsPerDay}
-                  onChange={(e) =>
-                    setFormData({ ...formData, totalAuctionsPerDay: parseInt(e.target.value) })
-                  }
+                  onChange={(e) => handleTotalAuctionsChange(parseInt(e.target.value))}
                   className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-500"
                   required
                 />
+                <p className="text-xs text-purple-600 mt-1">
+                  Daily configs will be auto-generated based on this value
+                </p>
               </div>
 
               <div className="flex items-center gap-3">
@@ -855,7 +902,7 @@ const CreateMasterAuctionModal = ({
           <div className="bg-purple-50 rounded-xl p-4 border-2 border-purple-200">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-purple-900">
-                Daily Auction Config ({dailyAuctions.length})
+                Daily Auction Config ({dailyAuctions.length}/{formData.totalAuctionsPerDay})
               </h3>
               <button
                 type="button"
@@ -866,6 +913,7 @@ const CreateMasterAuctionModal = ({
                     auctionNumber: dailyAuctions.length + 1,
                     TimeSlot: '12:00',
                     auctionName: '',
+                    imageUrl: '',
                     prizeValue: 0,
                     Status: 'UPCOMING',
                     maxDiscount: 10,
@@ -886,13 +934,13 @@ const CreateMasterAuctionModal = ({
                 className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                Add Auction
+                Edit Auction
               </button>
             </div>
 
             {dailyAuctions.length === 0 ? (
               <div className="text-center py-8 text-purple-600">
-                No auctions added yet. Click "Add Auction" to create one.
+                Set "Total Auctions Per Day" to auto-generate daily configs
               </div>
             ) : (
               <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -908,6 +956,9 @@ const CreateMasterAuctionModal = ({
                           {auction.TimeSlot}
                         </span>
                         <span className="text-sm text-purple-600">{auction.auctionName}</span>
+                        {auction.imageUrl && (
+                          <span className="text-xs text-purple-500">🖼️ Has Image</span>
+                        )}
                       </div>
                       <div className="flex items-center gap-4 text-sm text-purple-600">
                         <span>Prize: ₹{auction.prizeValue.toLocaleString()}</span>
@@ -923,13 +974,6 @@ const CreateMasterAuctionModal = ({
                         className="p-2 hover:bg-purple-100 rounded-lg transition-colors"
                       >
                         <Edit className="w-5 h-5 text-purple-600" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteAuction(index)}
-                        className="p-2 hover:bg-red-100 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-5 h-5 text-red-600" />
                       </button>
                     </div>
                   </div>
@@ -996,6 +1040,21 @@ const CreateMasterAuctionModal = ({
                         placeholder="iPhone 14 Pro"
                         className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
                         required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-700 mb-2">
+                        Image URL
+                      </label>
+                      <input
+                        type="url"
+                        value={currentAuction.imageUrl}
+                        onChange={(e) =>
+                          setCurrentAuction({ ...currentAuction, imageUrl: e.target.value })
+                        }
+                        placeholder="https://example.com/image.jpg"
+                        className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
                       />
                     </div>
 
@@ -1243,7 +1302,7 @@ const CreateMasterAuctionModal = ({
                       onClick={handleAddAuction}
                       className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all"
                     >
-                      {editingIndex !== null ? 'Update' : 'Add'} Auction
+                      {editingIndex !== null ? 'Update' : 'Save'} Auction
                     </button>
                   </div>
                 </div>
@@ -1262,7 +1321,7 @@ const CreateMasterAuctionModal = ({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || dailyAuctions.length === 0}
+              disabled={isSubmitting || dailyAuctions.length === 0 || dailyAuctions.length !== formData.totalAuctionsPerDay}
               className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all disabled:opacity-50"
             >
               {isSubmitting ? 'Creating...' : 'Create Master Auction'}
