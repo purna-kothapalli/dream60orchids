@@ -100,10 +100,10 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
 
   const fetchStatistics = async () => {
     try {
-      const statsResponse = await fetch(
-        `/admin/statistics?user_id=${adminUser.user_id}`
+      const response = await fetch(
+        `http://localhost:5000/admin/statistics?user_id=${adminUser.user_id}`
       );
-      const data = await statsResponse.json();
+      const data = await response.json();
 
       if (data.success) {
         setStatistics(data.data);
@@ -118,10 +118,10 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
 
   const fetchMasterAuctions = async () => {
     try {
-      const auctionsResponse = await fetch(
-        `/admin/master-auctions?user_id=${adminUser.user_id}`
+      const response = await fetch(
+        `http://localhost:5000/admin/master-auctions?user_id=${adminUser.user_id}`
       );
-      const data = await auctionsResponse.json();
+      const data = await response.json();
 
       if (data.success) {
         setMasterAuctions(data.data);
