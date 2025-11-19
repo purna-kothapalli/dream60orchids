@@ -14,6 +14,9 @@ import {
   Search,
   Calendar,
   Clock,
+  Trash2,
+  Edit,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -621,6 +624,27 @@ interface CreateMasterAuctionModalProps {
   onSuccess: () => void;
 }
 
+interface RoundConfig {
+  round: number;
+  duration: number;
+  roundCutoffPercentage: number;
+  topBidAmountsPerRound: number;
+}
+
+interface DailyAuctionConfigItem {
+  auctionNumber: number;
+  TimeSlot: string;
+  auctionName: string;
+  prizeValue: number;
+  Status: 'UPCOMING' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
+  maxDiscount: number;
+  EntryFee: 'RANDOM' | 'MANUAL';
+  minEntryFee: number;
+  maxEntryFee: number;
+  roundCount: number;
+  roundConfig: RoundConfig[];
+}
+
 const CreateMasterAuctionModal = ({
   adminUserId,
   onClose,
@@ -630,31 +654,122 @@ const CreateMasterAuctionModal = ({
     totalAuctionsPerDay: 10,
     isActive: true,
   });
+  const [dailyAuctions, setDailyAuctions] = useState<DailyAuctionConfigItem[]>([]);
+  const [currentAuction, setCurrentAuction] = useState<DailyAuctionConfigItem>({
+    auctionNumber: 1,
+    TimeSlot: '12:00',
+    auctionName: 'iPhone 14 Pro',
+    prizeValue: 65000,
+    Status: 'UPCOMING',
+    maxDiscount: 10,
+    EntryFee: 'RANDOM',
+    minEntryFee: 20,
+    maxEntryFee: 80,
+    roundCount: 4,
+    roundConfig: [
+      {
+        round: 1,
+        duration: 15,
+        roundCutoffPercentage: 40,
+        topBidAmountsPerRound: 3,
+      },
+    ],
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAuctionForm, setShowAuctionForm] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  const handleAddRound = () => {
+    setCurrentAuction({
+      ...currentAuction,
+      roundConfig: [
+        ...currentAuction.roundConfig,
+        {
+          round: currentAuction.roundConfig.length + 1,
+          duration: 15,
+          roundCutoffPercentage: 40,
+          topBidAmountsPerRound: 3,
+        },
+      ],
+    });
+  };
+
+  const handleRemoveRound = (index: number) => {
+    const newRoundConfig = currentAuction.roundConfig.filter((_, i) => i !== index);
+    setCurrentAuction({
+      ...currentAuction,
+      roundConfig: newRoundConfig.map((round, i) => ({ ...round, round: i + 1 })),
+    });
+  };
+
+  const handleUpdateRound = (index: number, field: keyof RoundConfig, value: number) => {
+    const newRoundConfig = [...currentAuction.roundConfig];
+    newRoundConfig[index] = { ...newRoundConfig[index], [field]: value };
+    setCurrentAuction({
+      ...currentAuction,
+      roundConfig: newRoundConfig,
+    });
+  };
+
+  const handleAddAuction = () => {
+    if (editingIndex !== null) {
+      // Update existing auction
+      const newAuctions = [...dailyAuctions];
+      newAuctions[editingIndex] = currentAuction;
+      setDailyAuctions(newAuctions);
+      setEditingIndex(null);
+    } else {
+      // Add new auction
+      setDailyAuctions([...dailyAuctions, currentAuction]);
+    }
+
+    // Reset form
+    setCurrentAuction({
+      auctionNumber: dailyAuctions.length + 1,
+      TimeSlot: '12:00',
+      auctionName: '',
+      prizeValue: 0,
+      Status: 'UPCOMING',
+      maxDiscount: 10,
+      EntryFee: 'RANDOM',
+      minEntryFee: 20,
+      maxEntryFee: 80,
+      roundCount: 4,
+      roundConfig: [
+        {
+          round: 1,
+          duration: 15,
+          roundCutoffPercentage: 40,
+          topBidAmountsPerRound: 3,
+        },
+      ],
+    });
+    setShowAuctionForm(false);
+    toast.success(editingIndex !== null ? 'Auction updated' : 'Auction added');
+  };
+
+  const handleEditAuction = (index: number) => {
+    setCurrentAuction(dailyAuctions[index]);
+    setEditingIndex(index);
+    setShowAuctionForm(true);
+  };
+
+  const handleDeleteAuction = (index: number) => {
+    setDailyAuctions(dailyAuctions.filter((_, i) => i !== index));
+    toast.success('Auction removed');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (dailyAuctions.length === 0) {
+      toast.error('Please add at least one daily auction');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Generate sample daily auction config
-      const dailyAuctionConfig = [];
-      for (let i = 1; i <= formData.totalAuctionsPerDay; i++) {
-        const hour = 8 + i;
-        dailyAuctionConfig.push({
-          auctionNumber: i,
-          TimeSlot: `${hour.toString().padStart(2, '0')}:00`,
-          auctionName: `Hourly Auction ${i}`,
-          prizeValue: 50000 + i * 5000,
-          Status: 'UPCOMING',
-          EntryFee: 'RANDOM',
-          minEntryFee: 1000,
-          maxEntryFee: 3500,
-          maxDiscount: 10,
-          roundCount: 4,
-        });
-      }
-
       const response = await fetch(
         `http://localhost:5000/admin/master-auctions?user_id=${adminUserId}`,
         {
@@ -664,7 +779,7 @@ const CreateMasterAuctionModal = ({
           },
           body: JSON.stringify({
             ...formData,
-            dailyAuctionConfig,
+            dailyAuctionConfig: dailyAuctions,
           }),
         }
       );
@@ -687,42 +802,457 @@ const CreateMasterAuctionModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-        <h2 className="text-2xl font-bold text-purple-900 mb-4">Create Master Auction</h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full p-6 my-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-purple-900">Create Master Auction</h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-purple-100 rounded-lg transition-colors"
+          >
+            <X className="w-6 h-6 text-purple-700" />
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-purple-700 mb-2">
-              Total Auctions Per Day
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="24"
-              value={formData.totalAuctionsPerDay}
-              onChange={(e) =>
-                setFormData({ ...formData, totalAuctionsPerDay: parseInt(e.target.value) })
-              }
-              className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-500"
-              required
-            />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Settings */}
+          <div className="bg-purple-50 rounded-xl p-4 border-2 border-purple-200">
+            <h3 className="text-lg font-bold text-purple-900 mb-4">Basic Settings</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-purple-700 mb-2">
+                  Total Auctions Per Day
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="24"
+                  value={formData.totalAuctionsPerDay}
+                  onChange={(e) =>
+                    setFormData({ ...formData, totalAuctionsPerDay: parseInt(e.target.value) })
+                  }
+                  className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-500"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  checked={formData.isActive}
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                  className="w-5 h-5 text-purple-600 border-purple-300 rounded focus:ring-purple-500"
+                />
+                <label htmlFor="isActive" className="text-sm font-semibold text-purple-700">
+                  Set as Active
+                </label>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="isActive"
-              checked={formData.isActive}
-              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-              className="w-5 h-5 text-purple-600 border-purple-300 rounded focus:ring-purple-500"
-            />
-            <label htmlFor="isActive" className="text-sm font-semibold text-purple-700">
-              Set as Active
-            </label>
+          {/* Daily Auctions List */}
+          <div className="bg-purple-50 rounded-xl p-4 border-2 border-purple-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-purple-900">
+                Daily Auction Config ({dailyAuctions.length})
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAuctionForm(true);
+                  setEditingIndex(null);
+                  setCurrentAuction({
+                    auctionNumber: dailyAuctions.length + 1,
+                    TimeSlot: '12:00',
+                    auctionName: '',
+                    prizeValue: 0,
+                    Status: 'UPCOMING',
+                    maxDiscount: 10,
+                    EntryFee: 'RANDOM',
+                    minEntryFee: 20,
+                    maxEntryFee: 80,
+                    roundCount: 4,
+                    roundConfig: [
+                      {
+                        round: 1,
+                        duration: 15,
+                        roundCutoffPercentage: 40,
+                        topBidAmountsPerRound: 3,
+                      },
+                    ],
+                  });
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Add Auction
+              </button>
+            </div>
+
+            {dailyAuctions.length === 0 ? (
+              <div className="text-center py-8 text-purple-600">
+                No auctions added yet. Click "Add Auction" to create one.
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {dailyAuctions.map((auction, index) => (
+                  <div
+                    key={index}
+                    className="bg-white rounded-lg p-4 border border-purple-200 flex items-center justify-between"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="font-bold text-purple-900">#{auction.auctionNumber}</span>
+                        <span className="text-sm font-semibold text-purple-700">
+                          {auction.TimeSlot}
+                        </span>
+                        <span className="text-sm text-purple-600">{auction.auctionName}</span>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-purple-600">
+                        <span>Prize: ₹{auction.prizeValue.toLocaleString()}</span>
+                        <span>Entry: {auction.EntryFee}</span>
+                        <span>Rounds: {auction.roundCount}</span>
+                        <span className="px-2 py-1 bg-purple-100 rounded">{auction.Status}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleEditAuction(index)}
+                        className="p-2 hover:bg-purple-100 rounded-lg transition-colors"
+                      >
+                        <Edit className="w-5 h-5 text-purple-600" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteAuction(index)}
+                        className="p-2 hover:bg-red-100 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-5 h-5 text-red-600" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="flex gap-3 mt-6">
+          {/* Auction Form Modal */}
+          {showAuctionForm && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 my-8 max-h-[90vh] overflow-y-auto">
+                <h3 className="text-xl font-bold text-purple-900 mb-4">
+                  {editingIndex !== null ? 'Edit' : 'Add'} Daily Auction
+                </h3>
+
+                <div className="space-y-4">
+                  {/* Basic Auction Info */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-700 mb-2">
+                        Auction Number
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={currentAuction.auctionNumber}
+                        onChange={(e) =>
+                          setCurrentAuction({
+                            ...currentAuction,
+                            auctionNumber: parseInt(e.target.value),
+                          })
+                        }
+                        className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-700 mb-2">
+                        Time Slot
+                      </label>
+                      <input
+                        type="time"
+                        value={currentAuction.TimeSlot}
+                        onChange={(e) =>
+                          setCurrentAuction({ ...currentAuction, TimeSlot: e.target.value })
+                        }
+                        className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-700 mb-2">
+                        Auction Name
+                      </label>
+                      <input
+                        type="text"
+                        value={currentAuction.auctionName}
+                        onChange={(e) =>
+                          setCurrentAuction({ ...currentAuction, auctionName: e.target.value })
+                        }
+                        placeholder="iPhone 14 Pro"
+                        className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-700 mb-2">
+                        Prize Value (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={currentAuction.prizeValue}
+                        onChange={(e) =>
+                          setCurrentAuction({
+                            ...currentAuction,
+                            prizeValue: parseInt(e.target.value),
+                          })
+                        }
+                        className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-700 mb-2">
+                        Status
+                      </label>
+                      <select
+                        value={currentAuction.Status}
+                        onChange={(e) =>
+                          setCurrentAuction({
+                            ...currentAuction,
+                            Status: e.target.value as any,
+                          })
+                        }
+                        className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
+                      >
+                        <option value="UPCOMING">UPCOMING</option>
+                        <option value="LIVE">LIVE</option>
+                        <option value="COMPLETED">COMPLETED</option>
+                        <option value="CANCELLED">CANCELLED</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-700 mb-2">
+                        Max Discount (%)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={currentAuction.maxDiscount}
+                        onChange={(e) =>
+                          setCurrentAuction({
+                            ...currentAuction,
+                            maxDiscount: parseInt(e.target.value),
+                          })
+                        }
+                        className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-700 mb-2">
+                        Entry Fee Type
+                      </label>
+                      <select
+                        value={currentAuction.EntryFee}
+                        onChange={(e) =>
+                          setCurrentAuction({
+                            ...currentAuction,
+                            EntryFee: e.target.value as 'RANDOM' | 'MANUAL',
+                          })
+                        }
+                        className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
+                      >
+                        <option value="RANDOM">RANDOM</option>
+                        <option value="MANUAL">MANUAL</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-700 mb-2">
+                        Min Entry Fee (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={currentAuction.minEntryFee}
+                        onChange={(e) =>
+                          setCurrentAuction({
+                            ...currentAuction,
+                            minEntryFee: parseInt(e.target.value),
+                          })
+                        }
+                        className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-700 mb-2">
+                        Max Entry Fee (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={currentAuction.maxEntryFee}
+                        onChange={(e) =>
+                          setCurrentAuction({
+                            ...currentAuction,
+                            maxEntryFee: parseInt(e.target.value),
+                          })
+                        }
+                        className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-purple-700 mb-2">
+                        Round Count
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={currentAuction.roundCount}
+                        onChange={(e) =>
+                          setCurrentAuction({
+                            ...currentAuction,
+                            roundCount: parseInt(e.target.value),
+                          })
+                        }
+                        className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Round Config */}
+                  <div className="bg-purple-50 rounded-lg p-4 border-2 border-purple-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-bold text-purple-900">
+                        Round Configuration ({currentAuction.roundConfig.length})
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={handleAddRound}
+                        className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Round
+                      </button>
+                    </div>
+
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {currentAuction.roundConfig.map((round, index) => (
+                        <div
+                          key={index}
+                          className="bg-white rounded-lg p-3 border border-purple-200"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="font-bold text-purple-900">Round {round.round}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveRound(index)}
+                              className="p-1 hover:bg-red-100 rounded transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4 text-red-600" />
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                              <label className="block text-xs font-semibold text-purple-700 mb-1">
+                                Duration (min)
+                              </label>
+                              <input
+                                type="number"
+                                min="1"
+                                value={round.duration}
+                                onChange={(e) =>
+                                  handleUpdateRound(index, 'duration', parseInt(e.target.value))
+                                }
+                                className="w-full px-2 py-1 border border-purple-200 rounded text-sm focus:outline-none focus:border-purple-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-purple-700 mb-1">
+                                Cutoff (%)
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={round.roundCutoffPercentage}
+                                onChange={(e) =>
+                                  handleUpdateRound(
+                                    index,
+                                    'roundCutoffPercentage',
+                                    parseInt(e.target.value)
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-purple-200 rounded text-sm focus:outline-none focus:border-purple-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-purple-700 mb-1">
+                                Top Bids
+                              </label>
+                              <input
+                                type="number"
+                                min="1"
+                                value={round.topBidAmountsPerRound}
+                                onChange={(e) =>
+                                  handleUpdateRound(
+                                    index,
+                                    'topBidAmountsPerRound',
+                                    parseInt(e.target.value)
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-purple-200 rounded text-sm focus:outline-none focus:border-purple-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAuctionForm(false);
+                        setEditingIndex(null);
+                      }}
+                      className="flex-1 px-4 py-3 border-2 border-purple-200 text-purple-700 rounded-xl font-semibold hover:bg-purple-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAddAuction}
+                      className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all"
+                    >
+                      {editingIndex !== null ? 'Update' : 'Add'} Auction
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Submit Buttons */}
+          <div className="flex gap-3 pt-4 border-t-2 border-purple-200">
             <button
               type="button"
               onClick={onClose}
@@ -732,10 +1262,10 @@ const CreateMasterAuctionModal = ({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || dailyAuctions.length === 0}
               className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all disabled:opacity-50"
             >
-              {isSubmitting ? 'Creating...' : 'Create'}
+              {isSubmitting ? 'Creating...' : 'Create Master Auction'}
             </button>
           </div>
         </form>

@@ -181,6 +181,20 @@ type Auction = {
     boxes: Box[];
 };
 export default function App() {
+  // Check if URL path is /admin and redirect to admin login
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/admin' || path === '/admin/') {
+      // Check if already logged in as admin
+      const adminUserId = localStorage.getItem('admin_user_id');
+      if (adminUserId) {
+        setCurrentPage('admin-dashboard');
+      } else {
+        setCurrentPage('admin-login');
+      }
+    }
+  }, []);
+
   const [currentPage, setCurrentPage] = useState('game');
   const [currentUser, setCurrentUser] = useState<{
   id: string;
@@ -634,13 +648,19 @@ useEffect(() => {
   };
 
   const handleAdminLogout = () => {
+    localStorage.removeItem('admin_user_id');
+    localStorage.removeItem('admin_email');
     setAdminUser(null);
     setCurrentPage('game');
+    window.history.pushState({}, '', '/');
   };
 
   // Admin routes
   if (currentPage === 'admin-login') {
-    return <AdminLogin onLogin={handleAdminLogin} onBack={() => setCurrentPage('game')} />;
+    return <AdminLogin onLogin={handleAdminLogin} onBack={() => {
+      setCurrentPage('game');
+      window.history.pushState({}, '', '/');
+    }} />;
   }
 
   if (currentPage === 'admin-dashboard' && adminUser) {
