@@ -53,6 +53,8 @@ function normalizeMasterAuctionPayload(raw = {}) {
         TopBidAmountsPerRound: 'topBidAmountsPerRound',
         RoundCutoffPercentage: 'roundCutoffPercentage',
         MinPlayers: 'minPlayers',
+        ImageUrl: 'imageUrl',
+        imageUrl: 'imageUrl',
         // keep existing camelCase mapping to itself is harmless
       };
 

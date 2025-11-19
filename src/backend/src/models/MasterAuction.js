@@ -47,6 +47,7 @@ const DailyAuctionSchema = new mongoose.Schema(
       match: /^([01]\d|2[0-3]):([0-5]\d)$/,
     },
     auctionName: { type: String, required: true, trim: true },
+    imageUrl: { type: String, default: null, trim: true },
     prizeValue: { type: Number, required: true, min: 0 },
     Status: {
       type: String,

@@ -77,6 +77,7 @@ interface MasterAuction {
   dailyAuctionConfig: Array<{
     auctionNumber: number;
     auctionName: string;
+    imageUrl?: string;
     TimeSlot: string;
     prizeValue: number;
     Status: string;
@@ -564,6 +565,18 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
                             key={config.auctionNumber}
                             className="bg-purple-50 rounded-lg p-3 border border-purple-200"
                           >
+                            {config.imageUrl && (
+                              <div className="mb-2 rounded-lg overflow-hidden bg-white">
+                                <img
+                                  src={config.imageUrl}
+                                  alt={config.auctionName}
+                                  className="w-full h-24 object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                            )}
                             <div className="flex items-center gap-2 mb-1">
                               <Clock className="w-4 h-4 text-purple-600" />
                               <span className="font-semibold text-purple-900">
@@ -571,7 +584,7 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
                               </span>
                             </div>
                             <p className="text-sm text-purple-700">{config.auctionName}</p>
-                            <p className="text-xs text-purple-600">₹{config.prizeValue}</p>
+                            <p className="text-xs text-purple-600">₹{config.prizeValue.toLocaleString()}</p>
                           </div>
                         ))}
                       </div>
