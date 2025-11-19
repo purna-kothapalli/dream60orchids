@@ -307,7 +307,7 @@ const createMasterAuctionAdmin = async (req, res) => {
     const payload = { ...req.body };
     payload.createdBy = adminUser.user_id;
 
-    // Process dailyAuctionConfig for RANDOM entry fees
+    // Process dailyAuctionConfig for entry fees
     if (Array.isArray(payload.dailyAuctionConfig)) {
       payload.dailyAuctionConfig = payload.dailyAuctionConfig.map((auction) => {
         if (auction.EntryFee === 'RANDOM' && auction.minEntryFee != null && auction.maxEntryFee != null) {
@@ -316,6 +316,13 @@ const createMasterAuctionAdmin = async (req, res) => {
           return {
             ...auction,
             FeeSplits: feeSplits,
+          };
+        } else if (auction.EntryFee === 'MANUAL') {
+          // For MANUAL, set min and max to 0
+          return {
+            ...auction,
+            minEntryFee: 0,
+            maxEntryFee: 0,
           };
         }
         return auction;
@@ -449,7 +456,7 @@ const updateMasterAuctionAdmin = async (req, res) => {
     
     updates.modifiedBy = adminUser.user_id;
 
-    // Process dailyAuctionConfig for RANDOM entry fees
+    // Process dailyAuctionConfig for entry fees
     if (Array.isArray(updates.dailyAuctionConfig)) {
       updates.dailyAuctionConfig = updates.dailyAuctionConfig.map((auction) => {
         if (auction.EntryFee === 'RANDOM' && auction.minEntryFee != null && auction.maxEntryFee != null) {
@@ -458,6 +465,13 @@ const updateMasterAuctionAdmin = async (req, res) => {
           return {
             ...auction,
             FeeSplits: feeSplits,
+          };
+        } else if (auction.EntryFee === 'MANUAL') {
+          // For MANUAL, set min and max to 0
+          return {
+            ...auction,
+            minEntryFee: 0,
+            maxEntryFee: 0,
           };
         }
         return auction;

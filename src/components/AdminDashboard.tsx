@@ -1229,12 +1229,16 @@ const CreateMasterAuctionModal = ({
                       </label>
                       <select
                         value={currentAuction.EntryFee}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const newEntryFee = e.target.value as 'RANDOM' | 'MANUAL';
                           setCurrentAuction({
                             ...currentAuction,
-                            EntryFee: e.target.value as 'RANDOM' | 'MANUAL',
-                          })
-                        }
+                            EntryFee: newEntryFee,
+                            // Set min and max to 0 when MANUAL is selected
+                            minEntryFee: newEntryFee === 'MANUAL' ? 0 : currentAuction.minEntryFee,
+                            maxEntryFee: newEntryFee === 'MANUAL' ? 0 : currentAuction.maxEntryFee,
+                          });
+                        }}
                         className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
                       >
                         <option value="RANDOM">RANDOM</option>
@@ -1302,6 +1306,9 @@ const CreateMasterAuctionModal = ({
                         <div className="mt-3 p-3 bg-amber-100 rounded-lg border border-amber-300">
                           <p className="text-sm font-semibold text-amber-900">
                             Total Entry Fee: ₹{((currentAuction.FeeSplits?.BoxA || 0) + (currentAuction.FeeSplits?.BoxB || 0)).toLocaleString()}
+                          </p>
+                          <p className="text-xs text-amber-700 mt-1">
+                            Min & Max Entry Fee will be set to 0 for MANUAL mode
                           </p>
                         </div>
                       </div>
