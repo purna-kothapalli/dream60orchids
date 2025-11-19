@@ -163,60 +163,7 @@ const displayImage = liveAuctions.length > 0 ? liveAuctions[0].imageUrl : null;
                 </div>
               </div>
               
-              {/* Live Auctions Display */}
-              {!isLoading && liveAuctions.length > 0 && (
-                <div className="relative group/live">
-                  <div className="absolute -inset-[1px] bg-gradient-to-r from-violet-500/30 via-fuchsia-500/30 to-purple-500/30 rounded-[18px] blur-md opacity-40 group-hover/live:opacity-60 transition-opacity duration-500"></div>
-                  <div className="relative backdrop-blur-2xl bg-gradient-to-br from-violet-50/90 via-fuchsia-50/85 to-purple-50/90 border-2 border-violet-300/50 rounded-2xl p-2.5 sm:p-3 md:p-4 shadow-xl">
-                    // <div className="flex items-center gap-1.5 sm:gap-2 mb-2">
-                    //   <div className="bg-gradient-to-br from-violet-500 to-fuchsia-600 p-1 sm:p-1.5 rounded-xl shadow-md animate-pulse">
-                    //     <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-                    //   </div>
-                    //   <span className="text-xs sm:text-sm md:text-base font-bold bg-gradient-to-r from-violet-700 to-fuchsia-700 bg-clip-text text-transparent">
-                    //     🔴 {liveAuctions.length} Live Auction{liveAuctions.length > 1 ? 's' : ''} Now!
-                    //   </span>
-                    // </div>
-                    <div className="space-y-2">
-                      {liveAuctions.map((auction, index) => (
-                        <div 
-                          key={auction.auctionId}
-                          className="backdrop-blur-lg bg-white/70 rounded-xl p-2 sm:p-2.5 border border-violet-200/40 transition-all duration-300 hover:shadow-md hover:scale-[1.01]"
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden border-2 border-violet-300/60 shadow-md shrink-0">
-                                {auction.imageUrl ? (
-                                  <img 
-                                    src={auction.imageUrl}
-                                    alt={auction.auctionName}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-                                    <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                                  </div>
-                                )}
-                              </div>
-                              <div className="min-w-0">
-                                <div className="text-xs sm:text-sm font-bold text-violet-900 truncate">
-                                  {auction.auctionName}
-                                </div>
-                                <div className="text-[10px] sm:text-xs text-violet-600">
-                                  Slot #{auction.auctionNumber} • {auction.TimeSlot}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-0.5 text-violet-700 font-semibold text-xs sm:text-sm shrink-0">
-                              <IndianRupee className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                              <span>{auction.prizeValue.toLocaleString('en-IN')}</span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
+              
               
               <div className="space-y-2.5 sm:space-y-3">
                 {/* Entry Fee Payment Section - Show for both logged in and logged out */}
