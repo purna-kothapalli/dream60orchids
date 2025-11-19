@@ -19,8 +19,6 @@ interface AuctionConfig {
 export function AuctionSchedule() {
   const [auctions, setAuctions] = useState<AuctionConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const now = new Date();
-  const currentHour = now.getHours();
 
   useEffect(() => {
     const fetchAuctions = async () => {
@@ -40,67 +38,28 @@ export function AuctionSchedule() {
 
     fetchAuctions();
   }, []);
-
-  // Fallback prizes for when no data is available
-  const fallbackPrizes = [
-    { 
-      name: 'iPhone 15 Pro Max 256GB', 
-      value: 134900,
-      image: 'https://images.unsplash.com/photo-1727093493878-874890b4f9fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpUGhvbmUlMjBzbWFydHBob25lJTIwbW9kZXJufGVufDF8fHx8MTc2Mjc5OTQ1MHww&ixlib=rb-4.1.0&q=80&w=1080'
-    },
-    { 
-      name: 'Samsung Galaxy S24 Ultra', 
-      value: 124999,
-      image: 'https://images.unsplash.com/photo-1627609834360-74948f361335?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxTYW1zdW5nJTIwR2FsYXh5JTIwc21hcnRwaG9uZXxlbnwxfHx8fDE3NjI3OTk0NTF8MA&ixlib=rb-4.1.0&q=80&w=1080'
-    },
-  ];
   
-  // Create schedule data from API or fallback
-  const scheduleData = auctions.length > 0 
-    ? auctions.map((auction, index) => {
-        const timeSlot = auction.TimeSlot || '12:00';
-        const [hourStr] = timeSlot.split(':');
-        const auctionHour = parseInt(hourStr, 10);
-        const hour12 = auctionHour > 12 ? auctionHour - 12 : auctionHour === 0 ? 12 : auctionHour;
-        const period = auctionHour >= 12 ? 'PM' : 'AM';
-        const timeStr = `${hour12}:${timeSlot.split(':')[1]} ${period}`;
-        
-        return {
-          time: timeStr,
-          hour: auctionHour,
-          status: auction.Status.toLowerCase(),
-          prize: {
-            name: auction.auctionName,
-            value: auction.prizeValue,
-            image: auction.imageUrl || fallbackPrizes[index % fallbackPrizes.length].image
-          },
-          winner: auction.Status === 'COMPLETED' ? `Winner${Math.floor(Math.random() * 999)}` : null
-        };
-      })
-    : Array.from({ length: 10 }, (_, i) => {
-        const auctionHour = 9 + i;
-        const hour12 = auctionHour > 12 ? auctionHour - 12 : auctionHour;
-        const period = auctionHour >= 12 ? 'PM' : 'AM';
-        const timeStr = `${hour12}:00 ${period}`;
-        
-        let status = 'upcoming';
-        let winner = null;
-        
-        if (auctionHour < currentHour) {
-          status = 'completed';
-          winner = `Winner${Math.floor(Math.random() * 999)}`;
-        } else if (auctionHour === currentHour) {
-          status = 'active';
-        }
-        
-        return {
-          time: timeStr,
-          hour: auctionHour,
-          status,
-          prize: fallbackPrizes[i % fallbackPrizes.length],
-          winner
-        };
-      });
+  // Create schedule data from API only - NO FALLBACK
+  const scheduleData = auctions.map((auction) => {
+    const timeSlot = auction.TimeSlot || '12:00';
+    const [hourStr] = timeSlot.split(':');
+    const auctionHour = parseInt(hourStr, 10);
+    const hour12 = auctionHour > 12 ? auctionHour - 12 : auctionHour === 0 ? 12 : auctionHour;
+    const period = auctionHour >= 12 ? 'PM' : 'AM';
+    const timeStr = `${hour12}:${timeSlot.split(':')[1]} ${period}`;
+    
+    return {
+      time: timeStr,
+      hour: auctionHour,
+      status: auction.Status.toLowerCase(),
+      prize: {
+        name: auction.auctionName,
+        value: auction.prizeValue,
+        image: auction.imageUrl || null // NO FALLBACK - null if not provided
+      },
+      winner: auction.Status === 'COMPLETED' ? `Winner${Math.floor(Math.random() * 999)}` : null
+    };
+  });
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -129,6 +88,23 @@ export function AuctionSchedule() {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-700 mx-auto mb-4"></div>
             <p className="text-purple-700 font-semibold">Loading auction schedule...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show empty state if no auctions from API
+  if (auctions.length === 0) {
+    return (
+      <Card className="relative border-2 border-purple-300/60 backdrop-blur-2xl bg-gradient-to-br from-white/90 via-purple-50/60 to-violet-50/70 shadow-2xl">
+        <CardContent className="p-8">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-purple-900 mb-2">No Auctions Scheduled</h3>
+            <p className="text-purple-600">There are no auctions scheduled for today. Please check back later.</p>
           </div>
         </CardContent>
       </Card>
@@ -201,7 +177,7 @@ export function AuctionSchedule() {
                 <Sparkles className="w-5 h-5 text-violet-600" />
               </CardTitle>
               <p className="text-purple-600 text-xs sm:text-sm mt-1">
-                {auctions.length > 0 ? `${auctions.length} premium auctions` : '10 premium auctions'} daily • 9 AM - 7 PM • 6 boxes per auction
+                {auctions.length} premium auctions daily • 6 boxes per auction
               </p>
             </div>
           </div>
@@ -275,14 +251,20 @@ export function AuctionSchedule() {
                         </div>
                       </div>
                       
-                      {/* Right side - Prize with Image - UNIFORM SIZE */}
+                      {/* Right side - Prize with Image or Placeholder */}
                       <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-purple-200/50 w-full lg:w-80">
                         <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-purple-300/60 shadow-md shrink-0">
-                          <ImageWithFallback 
-                            src={auction.prize.image}
-                            alt={auction.prize.name}
-                            className="w-full h-full object-cover"
-                          />
+                          {auction.prize.image ? (
+                            <ImageWithFallback 
+                              src={auction.prize.image}
+                              alt={auction.prize.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                              <Trophy className="w-10 h-10 text-white" />
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1 text-xs text-purple-600 mb-1">
