@@ -44,7 +44,7 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
   useEffect(() => {
     const fetchLiveAuctions = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/v1/master-auctions');
+        const response = await fetch('http://localhost:5000/admin/master-auctions?user_id=e3e76f86-87db-43d6-bda2-172733d9c2db&page=1&limit=20');
         const data = await response.json();
         
         if (data.success && data.data) {
