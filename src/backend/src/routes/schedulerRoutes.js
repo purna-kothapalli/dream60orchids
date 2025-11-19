@@ -1,54 +1,65 @@
 // src/backend/src/routes/schedulerRoutes.js
 const express = require('express');
 const router = express.Router();
-const schedulerController = require('../controllers/schedulerController');
+const schedulerController = require('../controllers/auctionSchedulerController');
 
 /**
- * @route   POST /api/scheduler/initialize
- * @desc    Initialize daily auctions (create first 3 auctions at 9 AM)
+ * @route   POST /api/v1/scheduler/initialize
+ * @desc    Initialize the scheduler with a master auction ID
+ * @access  Admin
  * @body    { masterAuctionId: string }
  */
-router.post('/initialize', schedulerController.initializeDailyAuctions);
+router.post('/initialize', schedulerController.initialize);
 
 /**
- * @route   POST /api/scheduler/progress
- * @desc    Progress auctions (mark LIVE as COMPLETED, create new UPCOMING)
- * @body    { masterAuctionId: string }
+ * @route   POST /api/v1/scheduler/start
+ * @desc    Start all cron jobs
+ * @access  Admin
  */
-router.post('/progress', schedulerController.progressAuctions);
+router.post('/start', schedulerController.startCronJobs);
 
 /**
- * @route   GET /api/scheduler/status/:masterAuctionId
- * @desc    Get current auction status
- * @param   masterAuctionId - Master auction ID
+ * @route   POST /api/v1/scheduler/stop
+ * @desc    Stop all cron jobs
+ * @access  Admin
  */
-router.get('/status/:masterAuctionId', schedulerController.getCurrentStatus);
+router.post('/stop', schedulerController.stopCronJobs);
 
 /**
- * @route   GET /api/scheduler/current/:masterAuctionId
- * @desc    Get current live and upcoming auctions
- * @param   masterAuctionId - Master auction ID
+ * @route   GET /api/v1/scheduler/status
+ * @desc    Get status of all cron jobs
+ * @access  Admin
  */
-router.get('/current/:masterAuctionId', schedulerController.getCurrentAuctions);
+router.get('/status', schedulerController.getStatus);
 
 /**
- * @route   POST /api/scheduler/reset
- * @desc    Reset daily auctions (for testing)
- * @body    { masterAuctionId: string }
+ * @route   GET /api/v1/scheduler/current-auctions
+ * @desc    Get current auction status (LIVE, UPCOMING, COMPLETED)
+ * @access  Public
  */
-router.post('/reset', schedulerController.resetDailyAuctions);
+router.get('/current-auctions', schedulerController.getCurrentAuctions);
+
+// ===== Manual Trigger Routes (for testing) =====
 
 /**
- * @route   POST /api/scheduler/start
- * @desc    Start automatic scheduler
- * @body    { masterAuctionId: string, intervalMinutes?: number }
+ * @route   POST /api/v1/scheduler/manual/initialize
+ * @desc    Manually trigger daily auction initialization
+ * @access  Admin
  */
-router.post('/start', schedulerController.startScheduler);
+router.post('/manual/initialize', schedulerController.manualInitialize);
 
 /**
- * @route   POST /api/scheduler/stop
- * @desc    Stop automatic scheduler
+ * @route   POST /api/v1/scheduler/manual/progress
+ * @desc    Manually trigger auction progression
+ * @access  Admin
  */
-router.post('/stop', schedulerController.stopScheduler);
+router.post('/manual/progress', schedulerController.manualProgress);
+
+/**
+ * @route   POST /api/v1/scheduler/manual/reset
+ * @desc    Manually trigger daily auction reset
+ * @access  Admin
+ */
+router.post('/manual/reset', schedulerController.manualReset);
 
 module.exports = router;

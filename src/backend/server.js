@@ -12,6 +12,7 @@ const userRoutes = require('./src/routes/userRoutes');
 const masterRoutes = require('./src/routes/masterBidRoutes');
 const priceMartRoutes = require('./src/routes/priceMartRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
+const schedulerRoutes = require('./src/routes/schedulerRoutes');
 
 const app = express();
 
@@ -75,8 +76,6 @@ app.use(
 console.log(`🌍 Allowed frontend origins: ${allowedOrigins.join(', ')}`);
 console.log(`🌍 NODE_ENV=${process.env.NODE_ENV || 'undefined'}`);
 
-
-
 // --------------------
 // Swagger Setup
 // --------------------
@@ -116,13 +115,14 @@ console.log(
 );
 
 // --------------------
-// Routes (No /v1 prefixes)
+// Routes
 // --------------------
 app.use('/auth', authRoutes);
 app.use('/auth', userRoutes);
 app.use('/master-bids', masterRoutes);
 app.use('/priceMart', priceMartRoutes);
 app.use('/admin', adminRoutes);
+app.use('/api/v1/scheduler', schedulerRoutes);
 
 // --------------------
 // MongoDB Connection
