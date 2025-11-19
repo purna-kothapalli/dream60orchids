@@ -79,6 +79,135 @@ const {
  *               type: number
  *             totalAmountWon:
  *               type: number
+ *
+ *     RoundConfig:
+ *       type: object
+ *       required:
+ *         - round
+ *         - duration
+ *         - roundCutoffPercentage
+ *         - topBidAmountsPerRound
+ *       properties:
+ *         round:
+ *           type: number
+ *           example: 1
+ *           description: Round number
+ *         duration:
+ *           type: number
+ *           example: 15
+ *           description: Duration in minutes
+ *         roundCutoffPercentage:
+ *           type: number
+ *           example: 40
+ *           description: Percentage of players to eliminate
+ *         topBidAmountsPerRound:
+ *           type: number
+ *           example: 3
+ *           description: Number of top bids to display
+ *
+ *     DailyAuctionConfig:
+ *       type: object
+ *       required:
+ *         - auctionNumber
+ *         - TimeSlot
+ *         - auctionName
+ *         - prizeValue
+ *         - Status
+ *         - maxDiscount
+ *         - EntryFee
+ *         - minEntryFee
+ *         - maxEntryFee
+ *         - roundCount
+ *         - roundConfig
+ *       properties:
+ *         auctionNumber:
+ *           type: number
+ *           example: 1
+ *           description: Sequential auction number for the day
+ *         TimeSlot:
+ *           type: string
+ *           example: "12:00"
+ *           description: Time slot for the auction (HH:MM format)
+ *         auctionName:
+ *           type: string
+ *           example: "iPhone 14 Pro"
+ *           description: Name of the auction item
+ *         imageUrl:
+ *           type: string
+ *           example: "https://example.com/image.jpg"
+ *           description: URL of the auction item image
+ *         prizeValue:
+ *           type: number
+ *           example: 65000
+ *           description: Value of the prize in rupees
+ *         Status:
+ *           type: string
+ *           enum: [UPCOMING, LIVE, COMPLETED, CANCELLED]
+ *           example: "UPCOMING"
+ *           description: Current status of the auction
+ *         maxDiscount:
+ *           type: number
+ *           example: 10
+ *           description: Maximum discount percentage
+ *         EntryFee:
+ *           type: string
+ *           enum: [RANDOM, MANUAL]
+ *           example: "RANDOM"
+ *           description: Entry fee type
+ *         minEntryFee:
+ *           type: number
+ *           example: 20
+ *           description: Minimum entry fee in rupees
+ *         maxEntryFee:
+ *           type: number
+ *           example: 80
+ *           description: Maximum entry fee in rupees
+ *         roundCount:
+ *           type: number
+ *           example: 4
+ *           description: Total number of rounds
+ *         roundConfig:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/RoundConfig'
+ *           description: Configuration for each round
+ *
+ *     MasterAuctionRequest:
+ *       type: object
+ *       required:
+ *         - totalAuctionsPerDay
+ *         - dailyAuctionConfig
+ *       properties:
+ *         totalAuctionsPerDay:
+ *           type: number
+ *           example: 10
+ *           description: Total number of auctions per day (1-24)
+ *         isActive:
+ *           type: boolean
+ *           example: true
+ *           description: Whether this master auction is active
+ *         dailyAuctionConfig:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/DailyAuctionConfig'
+ *           description: Array of daily auction configurations
+ *
+ *     MasterAuctionUpdateRequest:
+ *       type: object
+ *       properties:
+ *         totalAuctionsPerDay:
+ *           type: number
+ *           example: 10
+ *           description: Total number of auctions per day (1-24)
+ *         isActive:
+ *           type: boolean
+ *           example: true
+ *           description: Whether this master auction is active
+ *         dailyAuctionConfig:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/DailyAuctionConfig'
+ *           description: Array of daily auction configurations
  */
 
 /**
@@ -241,14 +370,7 @@ router.get('/users', getAllUsersAdmin);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               totalAuctionsPerDay:
- *                 type: number
- *               dailyAuctionConfig:
- *                 type: array
- *               isActive:
- *                 type: boolean
+ *             $ref: '#/components/schemas/MasterAuctionRequest'
  *     responses:
  *       201:
  *         description: Master auction created successfully
@@ -269,7 +391,7 @@ router.post('/master-auctions', createMasterAuctionAdmin);
  * /admin/master-auctions/{master_id}:
  *   put:
  *     summary: UPDATE MASTER AUCTION (ADMIN)
- *     description: Update an existing master auction (requires admin user_id)
+ *     description: Update an existing master auction with complete configuration (requires admin user_id)
  *     tags: [Admin]
  *     parameters:
  *       - name: master_id
@@ -277,6 +399,7 @@ router.post('/master-auctions', createMasterAuctionAdmin);
  *         required: true
  *         schema:
  *           type: string
+ *         description: Master auction ID to update
  *       - name: user_id
  *         in: query
  *         required: true
@@ -288,10 +411,43 @@ router.post('/master-auctions', createMasterAuctionAdmin);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
+ *             $ref: '#/components/schemas/MasterAuctionUpdateRequest'
+ *           example:
+ *             totalAuctionsPerDay: 10
+ *             isActive: true
+ *             dailyAuctionConfig:
+ *               - auctionNumber: 1
+ *                 TimeSlot: "12:00"
+ *                 auctionName: "iPhone 14 Pro"
+ *                 imageUrl: "https://example.com/iphone.jpg"
+ *                 prizeValue: 65000
+ *                 Status: "UPCOMING"
+ *                 maxDiscount: 10
+ *                 EntryFee: "RANDOM"
+ *                 minEntryFee: 20
+ *                 maxEntryFee: 80
+ *                 roundCount: 4
+ *                 roundConfig:
+ *                   - round: 1
+ *                     duration: 15
+ *                     roundCutoffPercentage: 40
+ *                     topBidAmountsPerRound: 3
  *     responses:
  *       200:
  *         description: Master auction updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Validation error
  *       401:
  *         description: Unauthorized
  *       403:

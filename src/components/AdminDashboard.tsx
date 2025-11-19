@@ -560,7 +560,7 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
                     <div className="mt-4">
                       <h4 className="font-semibold text-purple-900 mb-2">Auction Slots:</h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {auction.dailyAuctionConfig.slice(0, 6).map((config) => (
+                        {auction.dailyAuctionConfig.map((config) => (
                           <div
                             key={config.auctionNumber}
                             className="bg-purple-50 rounded-lg p-3 border border-purple-200"
