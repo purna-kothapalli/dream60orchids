@@ -5,6 +5,21 @@ const MasterBid = require('../models/MasterBid');
 const bcrypt = require('bcryptjs');
 
 /**
+ * Helper: Generate random BoxA and BoxB fees that add up to a total within min/max range
+ */
+function generateRandomFeeSplits(minEntryFee, maxEntryFee) {
+  // Generate random total fee within range
+  const totalFee = Math.floor(Math.random() * (maxEntryFee - minEntryFee + 1)) + minEntryFee;
+  
+  // Split randomly - BoxA gets 30-70% of total
+  const splitPercentage = Math.random() * 0.4 + 0.3; // 0.3 to 0.7
+  const BoxA = Math.floor(totalFee * splitPercentage);
+  const BoxB = totalFee - BoxA;
+  
+  return { BoxA, BoxB };
+}
+
+/**
  * Admin Login
  * Checks if credentials match dream60@gmail.com / Dharsh@2003
  * and if user exists in DB with ADMIN userType
@@ -292,6 +307,21 @@ const createMasterAuctionAdmin = async (req, res) => {
     const payload = { ...req.body };
     payload.createdBy = adminUser.user_id;
 
+    // Process dailyAuctionConfig for RANDOM entry fees
+    if (Array.isArray(payload.dailyAuctionConfig)) {
+      payload.dailyAuctionConfig = payload.dailyAuctionConfig.map((auction) => {
+        if (auction.EntryFee === 'RANDOM' && auction.minEntryFee != null && auction.maxEntryFee != null) {
+          // Generate random BoxA and BoxB fees
+          const feeSplits = generateRandomFeeSplits(auction.minEntryFee, auction.maxEntryFee);
+          return {
+            ...auction,
+            FeeSplits: feeSplits,
+          };
+        }
+        return auction;
+      });
+    }
+
     // If setting as active, deactivate others
     if (payload.isActive === true) {
       await MasterAuction.updateMany({ isActive: true }, { $set: { isActive: false } });
@@ -418,6 +448,21 @@ const updateMasterAuctionAdmin = async (req, res) => {
     delete updates.createdBy;
     
     updates.modifiedBy = adminUser.user_id;
+
+    // Process dailyAuctionConfig for RANDOM entry fees
+    if (Array.isArray(updates.dailyAuctionConfig)) {
+      updates.dailyAuctionConfig = updates.dailyAuctionConfig.map((auction) => {
+        if (auction.EntryFee === 'RANDOM' && auction.minEntryFee != null && auction.maxEntryFee != null) {
+          // Generate random BoxA and BoxB fees
+          const feeSplits = generateRandomFeeSplits(auction.minEntryFee, auction.maxEntryFee);
+          return {
+            ...auction,
+            FeeSplits: feeSplits,
+          };
+        }
+        return auction;
+      });
+    }
 
     // If setting as active, deactivate others
     if (updates.isActive === true) {
