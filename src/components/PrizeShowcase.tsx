@@ -1,5 +1,17 @@
-import { Gift, IndianRupee, Users, CreditCard, Sparkles, TrendingUp } from 'lucide-react';
+import { Gift, IndianRupee, Users, CreditCard, Sparkles, TrendingUp, Trophy } from 'lucide-react';
 import { Button } from './ui/button';
+import { useState, useEffect } from 'react';
+
+interface AuctionConfig {
+  auctionNumber: number;
+  auctionId: string;
+  TimeSlot: string;
+  auctionName: string;
+  imageUrl?: string;
+  prizeValue: number;
+  Status: 'LIVE' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED';
+  master_id: string;
+}
 
 interface PrizeShowcaseProps {
   currentPrize: {
@@ -20,11 +32,40 @@ interface PrizeShowcaseProps {
 }
 
 export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeShowcaseProps) {
+  const [liveAuctions, setLiveAuctions] = useState<AuctionConfig[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLiveAuctions = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/v1/master-auctions/all-with-config');
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          // Filter only LIVE auctions
+          const live = data.data.filter((auction: AuctionConfig) => auction.Status === 'LIVE');
+          setLiveAuctions(live);
+        }
+      } catch (error) {
+        console.error('Error fetching live auctions:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLiveAuctions();
+  }, []);
+
   const entryBoxes = currentPrize.boxes.filter(box => box.type === 'entry');
   const hasAnyPaidEntry = currentPrize.userHasPaidEntry || entryBoxes.some(box => box.hasPaid);
   
   // Calculate total entry fee (Box 1 + Box 2)
   const totalEntryFee = entryBoxes.reduce((sum, box) => sum + (box.entryFee || 0), 0);
+
+  // Use live auction data if available, otherwise use currentPrize
+  const displayPrize = liveAuctions.length > 0 ? liveAuctions[0].auctionName : currentPrize.prize;
+  const displayPrizeValue = liveAuctions.length > 0 ? liveAuctions[0].prizeValue : currentPrize.prizeValue;
+  const displayImage = liveAuctions.length > 0 ? liveAuctions[0].imageUrl : null;
 
   return (
     <div className="relative group/main">
@@ -61,9 +102,13 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
               <div className="relative">
                 <div className="absolute -inset-2 bg-gradient-to-r from-[#9F7ACB]/20 via-[#B99FD9]/15 to-[#8456BC]/20 rounded-2xl blur-md"></div>
                 <div className="relative backdrop-blur-sm bg-white/40 rounded-xl p-2 sm:p-3">
-                  <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-[#53317B] via-[#6B3FA0] to-[#8456BC] bg-clip-text text-transparent leading-tight">
-                    {currentPrize.prize}
-                  </h3>
+                  {isLoading ? (
+                    <div className="h-8 bg-gradient-to-r from-purple-200 to-purple-300 rounded-lg animate-pulse"></div>
+                  ) : (
+                    <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-[#53317B] via-[#6B3FA0] to-[#8456BC] bg-clip-text text-transparent leading-tight">
+                      {displayPrize}
+                    </h3>
+                  )}
                 </div>
               </div>
               
@@ -74,9 +119,13 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                   <div className="absolute inset-0 bg-gradient-to-r from-[#8456BC]/10 to-[#9F7ACB]/10 rounded-xl blur group-hover/stat:blur-md transition-all"></div>
                   <div className="relative backdrop-blur-xl bg-white/70 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 border border-purple-200/40 shadow-sm inline-flex items-center space-x-1.5 sm:space-x-2">
                     <IndianRupee className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#6B3FA0]" />
-                    <span className="text-sm sm:text-base md:text-lg font-bold bg-gradient-to-r from-[#53317B] to-[#6B3FA0] bg-clip-text text-transparent">
-                      ₹{currentPrize.prizeValue.toLocaleString('en-IN')}
-                    </span>
+                    {isLoading ? (
+                      <div className="w-20 h-5 bg-gradient-to-r from-purple-200 to-purple-300 rounded animate-pulse"></div>
+                    ) : (
+                      <span className="text-sm sm:text-base md:text-lg font-bold bg-gradient-to-r from-[#53317B] to-[#6B3FA0] bg-clip-text text-transparent">
+                        ₹{displayPrizeValue.toLocaleString('en-IN')}
+                      </span>
+                    )}
                   </div>
                 </div>
                 
@@ -91,6 +140,61 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                   </div>
                 </div>
               </div>
+
+              {/* Live Auctions Display */}
+              {!isLoading && liveAuctions.length > 0 && (
+                <div className="relative group/live">
+                  <div className="absolute -inset-[1px] bg-gradient-to-r from-violet-500/30 via-fuchsia-500/30 to-purple-500/30 rounded-[18px] blur-md opacity-40 group-hover/live:opacity-60 transition-opacity duration-500"></div>
+                  <div className="relative backdrop-blur-2xl bg-gradient-to-br from-violet-50/90 via-fuchsia-50/85 to-purple-50/90 border-2 border-violet-300/50 rounded-2xl p-2.5 sm:p-3 md:p-4 shadow-xl">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-2">
+                      <div className="bg-gradient-to-br from-violet-500 to-fuchsia-600 p-1 sm:p-1.5 rounded-xl shadow-md animate-pulse">
+                        <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                      </div>
+                      <span className="text-xs sm:text-sm md:text-base font-bold bg-gradient-to-r from-violet-700 to-fuchsia-700 bg-clip-text text-transparent">
+                        🔴 {liveAuctions.length} Live Auction{liveAuctions.length > 1 ? 's' : ''} Now!
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {liveAuctions.map((auction, index) => (
+                        <div 
+                          key={auction.auctionId}
+                          className="backdrop-blur-lg bg-white/70 rounded-xl p-2 sm:p-2.5 border border-violet-200/40 transition-all duration-300 hover:shadow-md hover:scale-[1.01]"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden border-2 border-violet-300/60 shadow-md shrink-0">
+                                {auction.imageUrl ? (
+                                  <img 
+                                    src={auction.imageUrl}
+                                    alt={auction.auctionName}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                                    <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-xs sm:text-sm font-bold text-violet-900 truncate">
+                                  {auction.auctionName}
+                                </div>
+                                <div className="text-[10px] sm:text-xs text-violet-600">
+                                  Slot #{auction.auctionNumber} • {auction.TimeSlot}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-0.5 text-violet-700 font-semibold text-xs sm:text-sm shrink-0">
+                              <IndianRupee className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                              <span>{auction.prizeValue.toLocaleString('en-IN')}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
               
               <div className="space-y-2.5 sm:space-y-3">
                 {/* Entry Fee Payment Section */}
@@ -215,26 +319,36 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                   
                   {/* Image container */}
                   <div className="relative">
-                    <img 
-                      src="https://akm-img-a-in.tosshub.com/indiatoday/images/story/202310/macbook-pro-024011822-16x9_0.png?VersionId=CKXbmiOLkA_16ma0JbaKUxCWDp1WgA3t" 
-                      alt="MacBook Pro M3 Max" 
-                      className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-contain transform group-hover/image:scale-105 transition-transform duration-700"
-                    />
+                    {isLoading ? (
+                      <div className="w-full h-32 sm:h-40 md:h-48 lg:h-56 bg-gradient-to-r from-purple-200 to-purple-300 rounded-lg animate-pulse"></div>
+                    ) : displayImage ? (
+                      <img 
+                        src={displayImage}
+                        alt={displayPrize}
+                        className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-contain transform group-hover/image:scale-105 transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className="w-full h-32 sm:h-40 md:h-48 lg:h-56 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center">
+                        <Trophy className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 text-white opacity-50" />
+                      </div>
+                    )}
                   </div>
                   
                   {/* Live badge with pulse animation */}
-                  <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
-                    <div className="relative">
-                      {/* Pulsing glow */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] rounded-full blur-lg animate-pulse opacity-60"></div>
-                      
-                      {/* Badge */}
-                      <div className="relative bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold inline-flex items-center gap-1 sm:gap-1.5 shadow-xl">
-                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-pulse"></span>
-                        LIVE AUCTION
+                  {!isLoading && liveAuctions.length > 0 && (
+                    <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
+                      <div className="relative">
+                        {/* Pulsing glow */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] rounded-full blur-lg animate-pulse opacity-60"></div>
+                        
+                        {/* Badge */}
+                        <div className="relative bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold inline-flex items-center gap-1 sm:gap-1.5 shadow-xl">
+                          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-pulse"></span>
+                          LIVE AUCTION
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                   
                   {/* Bottom gradient fade */}
                   <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-white/90 via-purple-50/30 to-transparent pointer-events-none"></div>
