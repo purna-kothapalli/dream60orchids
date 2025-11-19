@@ -95,6 +95,7 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
   const [masterAuctions, setMasterAuctions] = useState<MasterAuction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateAuction, setShowCreateAuction] = useState(false);
+  const [editingAuction, setEditingAuction] = useState<MasterAuction | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchStatistics = async () => {
@@ -131,6 +132,16 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
       console.error('Error fetching master auctions:', error);
       toast.error('Failed to fetch master auctions');
     }
+  };
+
+  const handleEditAuction = (auction: MasterAuction) => {
+    setEditingAuction(auction);
+    setShowCreateAuction(true);
+  };
+
+  const handleCloseAuctionModal = () => {
+    setShowCreateAuction(false);
+    setEditingAuction(null);
   };
 
   useEffect(() => {
@@ -506,7 +517,10 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
             {/* Create Button */}
             <div className="flex justify-end">
               <button
-                onClick={() => setShowCreateAuction(true)}
+                onClick={() => {
+                  setEditingAuction(null);
+                  setShowCreateAuction(true);
+                }}
                 className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg"
               >
                 <Plus className="w-5 h-5" />
@@ -536,15 +550,24 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
                         </p>
                       </div>
                     </div>
-                    <span
-                      className={`px-4 py-2 rounded-full font-bold text-sm shadow-md ${
-                        auction.isActive
-                          ? 'bg-gradient-to-r from-green-500 to-green-600 text-white'
-                          : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white'
-                      }`}
-                    >
-                      {auction.isActive ? '● Active' : '○ Inactive'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`px-4 py-2 rounded-full font-bold text-sm shadow-md ${
+                          auction.isActive
+                            ? 'bg-gradient-to-r from-green-500 to-green-600 text-white'
+                            : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white'
+                        }`}
+                      >
+                        {auction.isActive ? '● Active' : '○ Inactive'}
+                      </span>
+                      <button
+                        onClick={() => handleEditAuction(auction)}
+                        className="p-2 hover:bg-purple-100 rounded-lg transition-colors"
+                        title="Edit auction"
+                      >
+                        <Edit className="w-5 h-5 text-purple-600" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 mb-4">
@@ -654,7 +677,10 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
                     Create your first master auction to get started
                   </p>
                   <button
-                    onClick={() => setShowCreateAuction(true)}
+                    onClick={() => {
+                      setEditingAuction(null);
+                      setShowCreateAuction(true);
+                    }}
                     className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-xl"
                   >
                     Create Master Auction
@@ -666,13 +692,14 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
         )}
       </main>
 
-      {/* Create Master Auction Modal */}
+      {/* Create/Edit Master Auction Modal */}
       {showCreateAuction && (
         <CreateMasterAuctionModal
           adminUserId={adminUser.user_id}
-          onClose={() => setShowCreateAuction(false)}
+          editingAuction={editingAuction}
+          onClose={handleCloseAuctionModal}
           onSuccess={() => {
-            setShowCreateAuction(false);
+            handleCloseAuctionModal();
             fetchMasterAuctions();
           }}
         />
@@ -681,9 +708,10 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
   );
 };
 
-// Create Master Auction Modal Component
+// Create/Edit Master Auction Modal Component
 interface CreateMasterAuctionModalProps {
   adminUserId: string;
+  editingAuction?: MasterAuction | null;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -712,14 +740,17 @@ interface DailyAuctionConfigItem {
 
 const CreateMasterAuctionModal = ({
   adminUserId,
+  editingAuction,
   onClose,
   onSuccess,
 }: CreateMasterAuctionModalProps) => {
   const [formData, setFormData] = useState({
-    totalAuctionsPerDay: 10,
-    isActive: true,
+    totalAuctionsPerDay: editingAuction?.totalAuctionsPerDay || 10,
+    isActive: editingAuction?.isActive ?? true,
   });
-  const [dailyAuctions, setDailyAuctions] = useState<DailyAuctionConfigItem[]>([]);
+  const [dailyAuctions, setDailyAuctions] = useState<DailyAuctionConfigItem[]>(
+    editingAuction?.dailyAuctionConfig || []
+  );
   const [currentAuction, setCurrentAuction] = useState<DailyAuctionConfigItem>({
     auctionNumber: 1,
     TimeSlot: '12:00',
@@ -750,36 +781,39 @@ const CreateMasterAuctionModal = ({
     const newTotal = Math.min(Math.max(value, 1), 24);
     setFormData({ ...formData, totalAuctionsPerDay: newTotal });
 
-    // Generate daily auction configs automatically
-    const newDailyAuctions: DailyAuctionConfigItem[] = [];
-    for (let i = 0; i < newTotal; i++) {
-      const hour = 9 + i; // Start from 9:00 AM
-      const timeSlot = `${hour.toString().padStart(2, '0')}:00`;
+    // Only auto-generate if not editing an existing auction
+    if (!editingAuction) {
+      // Generate daily auction configs automatically
+      const newDailyAuctions: DailyAuctionConfigItem[] = [];
+      for (let i = 0; i < newTotal; i++) {
+        const hour = 9 + i; // Start from 9:00 AM
+        const timeSlot = `${hour.toString().padStart(2, '0')}:00`;
+        
+        newDailyAuctions.push({
+          auctionNumber: i + 1,
+          TimeSlot: timeSlot,
+          auctionName: `Auction ${i + 1}`,
+          imageUrl: '',
+          prizeValue: 10000,
+          Status: 'UPCOMING',
+          maxDiscount: 10,
+          EntryFee: 'RANDOM',
+          minEntryFee: 20,
+          maxEntryFee: 80,
+          roundCount: 4,
+          roundConfig: [
+            {
+              round: 1,
+              duration: 15,
+              roundCutoffPercentage: 40,
+              topBidAmountsPerRound: 3,
+            },
+          ],
+        });
+      }
       
-      newDailyAuctions.push({
-        auctionNumber: i + 1,
-        TimeSlot: timeSlot,
-        auctionName: `Auction ${i + 1}`,
-        imageUrl: '',
-        prizeValue: 10000,
-        Status: 'UPCOMING',
-        maxDiscount: 10,
-        EntryFee: 'RANDOM',
-        minEntryFee: 20,
-        maxEntryFee: 80,
-        roundCount: 4,
-        roundConfig: [
-          {
-            round: 1,
-            duration: 15,
-            roundCutoffPercentage: 40,
-            topBidAmountsPerRound: 3,
-          },
-        ],
-      });
+      setDailyAuctions(newDailyAuctions);
     }
-    
-    setDailyAuctions(newDailyAuctions);
   };
 
   const handleAddRound = () => {
@@ -879,33 +913,36 @@ const CreateMasterAuctionModal = ({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(
-        `http://localhost:5000/admin/master-auctions?user_id=${adminUserId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...formData,
-            dailyAuctionConfig: dailyAuctions,
-          }),
-        }
-      );
+      const url = editingAuction
+        ? `http://localhost:5000/admin/master-auctions/${editingAuction.master_id}?user_id=${adminUserId}`
+        : `http://localhost:5000/admin/master-auctions?user_id=${adminUserId}`;
+      
+      const method = editingAuction ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          dailyAuctionConfig: dailyAuctions,
+        }),
+      });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        toast.error(data.message || 'Failed to create master auction');
+        toast.error(data.message || `Failed to ${editingAuction ? 'update' : 'create'} master auction`);
         setIsSubmitting(false);
         return;
       }
 
-      toast.success('Master auction created successfully');
+      toast.success(`Master auction ${editingAuction ? 'updated' : 'created'} successfully`);
       onSuccess();
     } catch (error) {
-      console.error('Error creating master auction:', error);
-      toast.error('Failed to create master auction');
+      console.error(`Error ${editingAuction ? 'updating' : 'creating'} master auction:`, error);
+      toast.error(`Failed to ${editingAuction ? 'update' : 'create'} master auction`);
       setIsSubmitting(false);
     }
   };
@@ -914,7 +951,9 @@ const CreateMasterAuctionModal = ({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full p-6 my-8">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-purple-900">Create Master Auction</h2>
+          <h2 className="text-2xl font-bold text-purple-900">
+            {editingAuction ? 'Edit' : 'Create'} Master Auction
+          </h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-purple-100 rounded-lg transition-colors"
@@ -942,7 +981,9 @@ const CreateMasterAuctionModal = ({
                   required
                 />
                 <p className="text-xs text-purple-600 mt-1">
-                  Daily configs will be auto-generated based on this value
+                  {editingAuction 
+                    ? 'Current daily auction configurations will be preserved'
+                    : 'Daily configs will be auto-generated based on this value'}
                 </p>
               </div>
 
@@ -1387,7 +1428,7 @@ const CreateMasterAuctionModal = ({
               disabled={isSubmitting || dailyAuctions.length === 0 || dailyAuctions.length !== formData.totalAuctionsPerDay}
               className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all disabled:opacity-50"
             >
-              {isSubmitting ? 'Creating...' : 'Create Master Auction'}
+              {isSubmitting ? `${editingAuction ? 'Updating' : 'Creating'}...` : `${editingAuction ? 'Update' : 'Create'} Master Auction`}
             </button>
           </div>
         </form>
