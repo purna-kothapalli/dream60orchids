@@ -1376,15 +1376,32 @@ const CreateMasterAuctionModal = ({
                         type="number"
                         min="1"
                         value={currentAuction.roundCount}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const newRoundCount = parseInt(e.target.value) || 1;
+                          
+                          // Automatically generate round configs based on round count
+                          const newRoundConfig: RoundConfig[] = [];
+                          for (let i = 0; i < newRoundCount; i++) {
+                            newRoundConfig.push({
+                              round: i + 1,
+                              duration: 15,
+                              roundCutoffPercentage: 40,
+                              topBidAmountsPerRound: 3,
+                            });
+                          }
+                          
                           setCurrentAuction({
                             ...currentAuction,
-                            roundCount: parseInt(e.target.value),
-                          })
-                        }
+                            roundCount: newRoundCount,
+                            roundConfig: newRoundConfig,
+                          });
+                        }}
                         className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
                         required
                       />
+                      <p className="text-xs text-purple-600 mt-1">
+                        Round configs will be auto-generated based on this count
+                      </p>
                     </div>
                   </div>
 
