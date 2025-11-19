@@ -519,72 +519,101 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
               {masterAuctions.map((auction) => (
                 <div
                   key={auction.master_id}
-                  className="bg-white rounded-xl shadow-lg p-6 border-2 border-purple-200"
+                  className="bg-gradient-to-br from-white via-purple-50/30 to-white rounded-2xl shadow-xl p-8 border-2 border-purple-300 hover:shadow-2xl transition-all duration-300"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-purple-900">
-                        Master Auction {auction.master_id.slice(0, 8)}
-                      </h3>
-                      <p className="text-sm text-purple-600">
-                        Created: {new Date(auction.createdAt).toLocaleDateString()}
-                      </p>
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="p-4 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl shadow-lg">
+                        <Trophy className="w-8 h-8 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-purple-900">
+                          Master Auction {auction.master_id.slice(0, 8)}
+                        </h3>
+                        <p className="text-sm text-purple-600 flex items-center gap-2 mt-1">
+                          <Calendar className="w-4 h-4" />
+                          Created: {new Date(auction.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
                     <span
-                      className={`px-4 py-2 rounded-full font-semibold ${
+                      className={`px-5 py-2.5 rounded-full font-bold text-sm shadow-lg ${
                         auction.isActive
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-700'
+                          ? 'bg-gradient-to-r from-green-500 to-green-600 text-white'
+                          : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white'
                       }`}
                     >
-                      {auction.isActive ? 'Active' : 'Inactive'}
+                      {auction.isActive ? '● Active' : '○ Inactive'}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-                    <div className="bg-purple-50 rounded-lg p-3">
-                      <p className="text-sm text-purple-600">Daily Auctions</p>
-                      <p className="text-2xl font-bold text-purple-900">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl p-4 border border-purple-300 shadow-md">
+                      <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">Daily Auctions</p>
+                      <p className="text-3xl font-bold text-purple-900">
                         {auction.totalAuctionsPerDay}
                       </p>
                     </div>
-                    <div className="bg-blue-50 rounded-lg p-3">
-                      <p className="text-sm text-blue-600">Configured</p>
-                      <p className="text-2xl font-bold text-blue-900">
+                    <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl p-4 border border-blue-300 shadow-md">
+                      <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-1">Configured</p>
+                      <p className="text-3xl font-bold text-blue-900">
                         {auction.dailyAuctionConfig?.length || 0}
                       </p>
                     </div>
                   </div>
 
                   {auction.dailyAuctionConfig && auction.dailyAuctionConfig.length > 0 && (
-                    <div className="mt-4">
-                      <h4 className="font-semibold text-purple-900 mb-2">Auction Slots:</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div className="mt-6">
+                      <h4 className="font-bold text-lg text-purple-900 mb-4 flex items-center gap-2">
+                        <Clock className="w-5 h-5" />
+                        Auction Slots
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {auction.dailyAuctionConfig.map((config) => (
                           <div
                             key={config.auctionNumber}
-                            className="bg-purple-50 rounded-lg p-3 border border-purple-200"
+                            className="group bg-white rounded-xl overflow-hidden border-2 border-purple-200 shadow-lg hover:shadow-xl hover:border-purple-400 transition-all duration-300 hover:-translate-y-1"
                           >
                             {config.imageUrl && (
-                              <div className="mb-2 rounded-lg overflow-hidden bg-white">
+                              <div className="relative h-32 bg-gradient-to-br from-purple-100 to-purple-200 overflow-hidden">
                                 <img
                                   src={config.imageUrl}
                                   alt={config.auctionName}
-                                  className="w-full h-24 object-cover"
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                   onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                   }}
                                 />
+                                <div className="absolute top-2 right-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                                  #{config.auctionNumber}
+                                </div>
                               </div>
                             )}
-                            <div className="flex items-center gap-2 mb-1">
-                              <Clock className="w-4 h-4 text-purple-600" />
-                              <span className="font-semibold text-purple-900">
-                                {config.TimeSlot}
-                              </span>
+                            {!config.imageUrl && (
+                              <div className="relative h-32 bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+                                <Trophy className="w-12 h-12 text-purple-400" />
+                                <div className="absolute top-2 right-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                                  #{config.auctionNumber}
+                                </div>
+                              </div>
+                            )}
+                            <div className="p-4">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Clock className="w-4 h-4 text-purple-600" />
+                                <span className="font-bold text-purple-900 text-sm">
+                                  {config.TimeSlot}
+                                </span>
+                              </div>
+                              <h5 className="font-semibold text-purple-900 text-sm mb-2 line-clamp-2">
+                                {config.auctionName}
+                              </h5>
+                              <div className="flex items-center justify-between pt-2 border-t border-purple-200">
+                                <span className="text-xs text-purple-600 font-semibold">Prize Value</span>
+                                <span className="text-sm font-bold text-purple-900">
+                                  ₹{config.prizeValue.toLocaleString()}
+                                </span>
+                              </div>
                             </div>
-                            <p className="text-sm text-purple-700">{config.auctionName}</p>
-                            <p className="text-xs text-purple-600">₹{config.prizeValue.toLocaleString()}</p>
                           </div>
                         ))}
                       </div>
@@ -594,17 +623,19 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
               ))}
 
               {masterAuctions.length === 0 && (
-                <div className="bg-white rounded-xl shadow-lg p-12 border-2 border-purple-200 text-center">
-                  <Trophy className="w-16 h-16 text-purple-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-purple-900 mb-2">
+                <div className="bg-gradient-to-br from-white via-purple-50/30 to-white rounded-2xl shadow-xl p-16 border-2 border-purple-300 text-center">
+                  <div className="bg-purple-100 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
+                    <Trophy className="w-12 h-12 text-purple-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-purple-900 mb-3">
                     No Master Auctions Yet
                   </h3>
-                  <p className="text-purple-600 mb-4">
+                  <p className="text-purple-600 mb-6 text-lg">
                     Create your first master auction to get started
                   </p>
                   <button
                     onClick={() => setShowCreateAuction(true)}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all"
+                    className="px-8 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-xl"
                   >
                     Create Master Auction
                   </button>
@@ -729,7 +760,6 @@ const CreateMasterAuctionModal = ({
     }
     
     setDailyAuctions(newDailyAuctions);
-    toast.success(`${newTotal} daily auction configs generated automatically`);
   };
 
   const handleAddRound = () => {
