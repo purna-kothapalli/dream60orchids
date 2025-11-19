@@ -41,32 +41,41 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
   const [boxAFee, setBoxAFee] = useState<number>(0);
   const [boxBFee, setBoxBFee] = useState<number>(0);
 
-  useEffect(() => {
-    const fetchLiveAuctions = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/admin/master-auctions?user_id=e3e76f86-87db-43d6-bda2-172733d9c2db&page=1&limit=20');
-        const data = await response.json();
-        
-        if (data.success && data.data) {
-          // Filter only LIVE auctions
-          const live = data.data.filter((auction: AuctionConfig) => auction.Status === 'LIVE');
-          setLiveAuctions(live);
-          
-          // Set fee splits from first live auction
-          if (live.length > 0 && live[0].feeSplits) {
-            setBoxAFee(live[0].feeSplits.BoxA || 0);
-            setBoxBFee(live[0].feeSplits.BoxB || 0);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching live auctions:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+useEffect(() => {
+  const fetchLiveAuctions = async () => {
+    try {
+      const response = await fetch(
+        'http://localhost:5000/admin/master-auctions?user_id=e3e76f86-87db-43d6-bda2-172733d9c2db&page=1&limit=20'
+      );
+      const data = await response.json();
 
-    fetchLiveAuctions();
-  }, []);
+      if (data.success && data.data.length > 0) {
+        const allAuctions = data.data[0].dailyAuctionConfig;
+
+        // Filter only LIVE auctions
+        const live = allAuctions.filter(
+          (auction: AuctionConfig) => auction.Status === 'LIVE'
+        );
+
+        setLiveAuctions(live);
+
+        // Use the first live auction
+        if (live.length > 0) {
+          const first = live[0];
+          setBoxAFee(first.FeeSplits?.BoxA || 0);
+          setBoxBFee(first.FeeSplits?.BoxB || 0);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching live auctions:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchLiveAuctions();
+}, []);
+
 
   const entryBoxes = currentPrize.boxes.filter(box => box.type === 'entry');
   const hasAnyPaidEntry = currentPrize.userHasPaidEntry || entryBoxes.some(box => box.hasPaid);
@@ -75,9 +84,10 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
   const totalEntryFee = boxAFee + boxBFee;
 
   // Use live auction data if available, otherwise use currentPrize
-  const displayPrize = liveAuctions.length > 0 ? liveAuctions[0].auctionName : currentPrize.prize;
-  const displayPrizeValue = liveAuctions.length > 0 ? liveAuctions[0].prizeValue : currentPrize.prizeValue;
-  const displayImage = liveAuctions.length > 0 ? liveAuctions[0].imageUrl : null;
+const displayPrize = liveAuctions.length > 0 ? liveAuctions[0].auctionName : currentPrize.prize;
+const displayPrizeValue = liveAuctions.length > 0 ? liveAuctions[0].prizeValue : currentPrize.prizeValue;
+const displayImage = liveAuctions.length > 0 ? liveAuctions[0].imageUrl : null;
+
 
   return (
     <div className="relative group/main">
