@@ -765,12 +765,10 @@ const CreateMasterAuctionModal = ({
     maxEntryFee: 80,
     roundCount: 4,
     roundConfig: [
-      {
-        round: 1,
-        duration: 15,
-        roundCutoffPercentage: 40,
-        topBidAmountsPerRound: 3,
-      },
+      { round: 1, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
+      { round: 2, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
+      { round: 3, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
+      { round: 4, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
     ],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -803,12 +801,10 @@ const CreateMasterAuctionModal = ({
           maxEntryFee: 80,
           roundCount: 4,
           roundConfig: [
-            {
-              round: 1,
-              duration: 15,
-              roundCutoffPercentage: 40,
-              topBidAmountsPerRound: 3,
-            },
+            { round: 1, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
+            { round: 2, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
+            { round: 3, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
+            { round: 4, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
           ],
         });
       }
@@ -861,7 +857,7 @@ const CreateMasterAuctionModal = ({
       setDailyAuctions([...dailyAuctions, currentAuction]);
     }
 
-    // Reset form
+    // Reset form with proper round configs
     setCurrentAuction({
       auctionNumber: dailyAuctions.length + 1,
       TimeSlot: '12:00',
@@ -875,12 +871,10 @@ const CreateMasterAuctionModal = ({
       maxEntryFee: 80,
       roundCount: 4,
       roundConfig: [
-        {
-          round: 1,
-          duration: 15,
-          roundCutoffPercentage: 40,
-          topBidAmountsPerRound: 3,
-        },
+        { round: 1, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
+        { round: 2, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
+        { round: 3, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
+        { round: 4, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
       ],
     });
     setShowAuctionForm(false);
@@ -1027,12 +1021,10 @@ const CreateMasterAuctionModal = ({
                     maxEntryFee: 80,
                     roundCount: 4,
                     roundConfig: [
-                      {
-                        round: 1,
-                        duration: 15,
-                        roundCutoffPercentage: 40,
-                        topBidAmountsPerRound: 3,
-                      },
+                      { round: 1, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
+                      { round: 2, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
+                      { round: 3, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
+                      { round: 4, duration: 15, roundCutoffPercentage: 40, topBidAmountsPerRound: 3 },
                     ],
                   });
                 }}
