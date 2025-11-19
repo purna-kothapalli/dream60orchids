@@ -568,50 +568,70 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
                         <Clock className="w-5 h-5" />
                         Auction Slots
                       </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      <div className="space-y-3">
                         {auction.dailyAuctionConfig.map((config) => (
                           <div
                             key={config.auctionNumber}
-                            className="group bg-white rounded-xl overflow-hidden border-2 border-purple-200 shadow-lg hover:shadow-xl hover:border-purple-400 transition-all duration-300 hover:-translate-y-1"
+                            className="group bg-white rounded-xl overflow-hidden border-2 border-purple-200 shadow-lg hover:shadow-xl hover:border-purple-400 transition-all duration-300 hover:-translate-y-0.5"
                           >
-                            {config.imageUrl && (
-                              <div className="relative h-32 bg-gradient-to-br from-purple-100 to-purple-200 overflow-hidden">
-                                <img
-                                  src={config.imageUrl}
-                                  alt={config.auctionName}
-                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                  }}
-                                />
-                                <div className="absolute top-2 right-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                            <div className="flex flex-col sm:flex-row">
+                              {/* Image Section */}
+                              <div className="relative w-full sm:w-48 h-32 sm:h-auto flex-shrink-0">
+                                {config.imageUrl ? (
+                                  <div className="relative h-full bg-gradient-to-br from-purple-100 to-purple-200 overflow-hidden">
+                                    <img
+                                      src={config.imageUrl}
+                                      alt={config.auctionName}
+                                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                      }}
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="relative h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+                                    <Trophy className="w-12 h-12 text-purple-400" />
+                                  </div>
+                                )}
+                                <div className="absolute top-2 left-2 bg-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
                                   #{config.auctionNumber}
                                 </div>
                               </div>
-                            )}
-                            {!config.imageUrl && (
-                              <div className="relative h-32 bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
-                                <Trophy className="w-12 h-12 text-purple-400" />
-                                <div className="absolute top-2 right-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
-                                  #{config.auctionNumber}
+
+                              {/* Content Section */}
+                              <div className="flex-1 p-4 sm:p-5">
+                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                                  {/* Left: Name & Time */}
+                                  <div className="flex-1">
+                                    <h5 className="font-bold text-lg text-purple-900 mb-2">
+                                      {config.auctionName}
+                                    </h5>
+                                    <div className="flex items-center gap-2 text-purple-600 mb-3">
+                                      <Clock className="w-4 h-4" />
+                                      <span className="font-semibold">{config.TimeSlot}</span>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                        config.Status === 'LIVE' ? 'bg-green-100 text-green-700' :
+                                        config.Status === 'UPCOMING' ? 'bg-blue-100 text-blue-700' :
+                                        config.Status === 'COMPLETED' ? 'bg-gray-100 text-gray-700' :
+                                        'bg-red-100 text-red-700'
+                                      }`}>
+                                        {config.Status}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Right: Prize Value */}
+                                  <div className="flex items-center gap-4 sm:flex-col sm:items-end">
+                                    <div className="text-left sm:text-right">
+                                      <p className="text-xs text-purple-600 font-semibold mb-1">Prize Value</p>
+                                      <p className="text-2xl font-bold text-purple-900">
+                                        ₹{config.prizeValue.toLocaleString()}
+                                      </p>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                            <div className="p-4">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Clock className="w-4 h-4 text-purple-600" />
-                                <span className="font-bold text-purple-900 text-sm">
-                                  {config.TimeSlot}
-                                </span>
-                              </div>
-                              <h5 className="font-semibold text-purple-900 text-sm mb-2 line-clamp-2">
-                                {config.auctionName}
-                              </h5>
-                              <div className="flex items-center justify-between pt-2 border-t border-purple-200">
-                                <span className="text-xs text-purple-600 font-semibold">Prize Value</span>
-                                <span className="text-sm font-bold text-purple-900">
-                                  ₹{config.prizeValue.toLocaleString()}
-                                </span>
                               </div>
                             </div>
                           </div>
