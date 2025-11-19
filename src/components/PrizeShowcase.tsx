@@ -11,6 +11,10 @@ interface AuctionConfig {
   prizeValue: number;
   Status: 'LIVE' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED';
   master_id: string;
+  feeSplits?: {
+    BoxA: number;
+    BoxB: number;
+  };
 }
 
 interface PrizeShowcaseProps {
@@ -34,6 +38,8 @@ interface PrizeShowcaseProps {
 export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeShowcaseProps) {
   const [liveAuctions, setLiveAuctions] = useState<AuctionConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [boxAFee, setBoxAFee] = useState<number>(0);
+  const [boxBFee, setBoxBFee] = useState<number>(0);
 
   useEffect(() => {
     const fetchLiveAuctions = async () => {
@@ -45,6 +51,12 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
           // Filter only LIVE auctions
           const live = data.data.filter((auction: AuctionConfig) => auction.Status === 'LIVE');
           setLiveAuctions(live);
+          
+          // Set fee splits from first live auction
+          if (live.length > 0 && live[0].feeSplits) {
+            setBoxAFee(live[0].feeSplits.BoxA || 0);
+            setBoxBFee(live[0].feeSplits.BoxB || 0);
+          }
         }
       } catch (error) {
         console.error('Error fetching live auctions:', error);
@@ -59,8 +71,8 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
   const entryBoxes = currentPrize.boxes.filter(box => box.type === 'entry');
   const hasAnyPaidEntry = currentPrize.userHasPaidEntry || entryBoxes.some(box => box.hasPaid);
   
-  // Calculate total entry fee (Box 1 + Box 2)
-  const totalEntryFee = entryBoxes.reduce((sum, box) => sum + (box.entryFee || 0), 0);
+  // Calculate total entry fee (BoxA + BoxB)
+  const totalEntryFee = boxAFee + boxBFee;
 
   // Use live auction data if available, otherwise use currentPrize
   const displayPrize = liveAuctions.length > 0 ? liveAuctions[0].auctionName : currentPrize.prize;
@@ -214,26 +226,43 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                         </span>
                       </div>
                       
-                      {/* Entry Fee Breakdown */}
+                      {/* Entry Fee Breakdown - BoxA and BoxB */}
                       <div className="space-y-1.5 sm:space-y-2 mb-2.5 sm:mb-3">
-                        {entryBoxes.map((box, _index) => (
-                          <div 
-                            key={box.id} 
-                            className="group/box relative backdrop-blur-lg bg-gradient-to-r from-purple-50/70 to-white/70 rounded-xl p-2 sm:p-2.5 border border-purple-100/40 transition-all duration-300 hover:shadow-md hover:scale-[1.01]"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs sm:text-sm font-semibold text-[#53317B]">Box {box.id}:</span>
-                              <div className="flex items-center gap-1">
-                                <IndianRupee className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8456BC]" />
+                        {/* Box 1 - BoxA */}
+                        <div className="group/box relative backdrop-blur-lg bg-gradient-to-r from-purple-50/70 to-white/70 rounded-xl p-2 sm:p-2.5 border border-purple-100/40 transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs sm:text-sm font-semibold text-[#53317B]">Box 1 (BoxA):</span>
+                            <div className="flex items-center gap-1">
+                              <IndianRupee className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8456BC]" />
+                              {isLoading ? (
+                                <div className="w-12 h-4 bg-gradient-to-r from-purple-200 to-purple-300 rounded animate-pulse"></div>
+                              ) : (
                                 <span className="text-xs sm:text-sm md:text-base font-bold bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] bg-clip-text text-transparent">
-                                  {box.entryFee?.toLocaleString('en-IN')}
+                                  {boxAFee.toLocaleString('en-IN')}
                                 </span>
-                              </div>
+                              )}
                             </div>
                           </div>
-                        ))}
+                        </div>
                         
-                        {/* Total */}
+                        {/* Box 2 - BoxB */}
+                        <div className="group/box relative backdrop-blur-lg bg-gradient-to-r from-purple-50/70 to-white/70 rounded-xl p-2 sm:p-2.5 border border-purple-100/40 transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs sm:text-sm font-semibold text-[#53317B]">Box 2 (BoxB):</span>
+                            <div className="flex items-center gap-1">
+                              <IndianRupee className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8456BC]" />
+                              {isLoading ? (
+                                <div className="w-12 h-4 bg-gradient-to-r from-purple-200 to-purple-300 rounded animate-pulse"></div>
+                              ) : (
+                                <span className="text-xs sm:text-sm md:text-base font-bold bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] bg-clip-text text-transparent">
+                                  {boxBFee.toLocaleString('en-IN')}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Total = BoxA + BoxB */}
                         <div className="relative mt-2 sm:mt-3 group/total">
                           <div className="absolute inset-0 bg-gradient-to-r from-[#8456BC]/15 to-[#B99FD9]/15 rounded-xl blur-sm"></div>
                           <div className="relative backdrop-blur-xl bg-gradient-to-r from-purple-100/85 to-purple-50/85 rounded-xl p-2 sm:p-2.5 md:p-3 border-2 border-[#9F7ACB]/40 shadow-lg">
@@ -244,9 +273,13 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                               </div>
                               <div className="flex items-center gap-0.5 sm:gap-1">
                                 <IndianRupee className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B3FA0]" />
-                                <span className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-[#53317B] to-[#8456BC] bg-clip-text text-transparent">
-                                  {totalEntryFee.toLocaleString('en-IN')}
-                                </span>
+                                {isLoading ? (
+                                  <div className="w-16 h-6 bg-gradient-to-r from-purple-200 to-purple-300 rounded animate-pulse"></div>
+                                ) : (
+                                  <span className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-[#53317B] to-[#8456BC] bg-clip-text text-transparent">
+                                    {totalEntryFee.toLocaleString('en-IN')}
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -256,7 +289,8 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                       {/* Single Pay Now Button */}
                       <Button
                         onClick={() => onPayEntry?.(0, totalEntryFee)}
-                        className="w-full relative overflow-hidden bg-gradient-to-r from-[#6B3FA0] via-[#8456BC] to-[#9F7ACB] text-white hover:from-[#8456BC] hover:via-[#9F7ACB] hover:to-[#B99FD9] shadow-xl text-xs sm:text-sm md:text-base py-2 sm:py-2.5 md:py-3 rounded-xl font-bold transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] group/button"
+                        disabled={isLoading || totalEntryFee === 0}
+                        className="w-full relative overflow-hidden bg-gradient-to-r from-[#6B3FA0] via-[#8456BC] to-[#9F7ACB] text-white hover:from-[#8456BC] hover:via-[#9F7ACB] hover:to-[#B99FD9] shadow-xl text-xs sm:text-sm md:text-base py-2 sm:py-2.5 md:py-3 rounded-xl font-bold transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] group/button disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <span className="relative z-10 flex items-center justify-center gap-1.5 sm:gap-2">
                           <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
