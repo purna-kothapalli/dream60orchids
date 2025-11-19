@@ -44,7 +44,7 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
   useEffect(() => {
     const fetchLiveAuctions = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/v1/master-auctions/all-with-config');
+        const response = await fetch('https://dev-api.dream60.com/api/v1/master-auctions/all-with-config');
         const data = await response.json();
         
         if (data.success && data.data) {
@@ -152,7 +152,7 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                   </div>
                 </div>
               </div>
-
+              
               {/* Live Auctions Display */}
               {!isLoading && liveAuctions.length > 0 && (
                 <div className="relative group/live">
@@ -209,8 +209,8 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
               )}
               
               <div className="space-y-2.5 sm:space-y-3">
-                {/* Entry Fee Payment Section */}
-                {!hasAnyPaidEntry && isLoggedIn && (
+                {/* Entry Fee Payment Section - Show for both logged in and logged out */}
+                {!hasAnyPaidEntry && (
                   <div className="relative group/entry">
                     {/* Animated glow effect */}
                     <div className="absolute -inset-[1px] bg-gradient-to-r from-[#8456BC]/30 via-[#9F7ACB]/30 to-[#B99FD9]/30 rounded-[18px] blur-md opacity-30 group-hover/entry:opacity-50 transition-opacity duration-500"></div>
@@ -286,23 +286,31 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                         </div>
                       </div>
 
-                      {/* Single Pay Now Button */}
-                      <Button
-                        onClick={() => onPayEntry?.(0, totalEntryFee)}
-                        disabled={isLoading || totalEntryFee === 0}
-                        className="w-full relative overflow-hidden bg-gradient-to-r from-[#6B3FA0] via-[#8456BC] to-[#9F7ACB] text-white hover:from-[#8456BC] hover:via-[#9F7ACB] hover:to-[#B99FD9] shadow-xl text-xs sm:text-sm md:text-base py-2 sm:py-2.5 md:py-3 rounded-xl font-bold transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] group/button disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <span className="relative z-10 flex items-center justify-center gap-1.5 sm:gap-2">
-                          <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                          <span>Pay Now - ₹{totalEntryFee.toLocaleString('en-IN')}</span>
-                        </span>
-                        {/* Shimmer effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12 -translate-x-full group-hover/button:translate-x-full transition-transform duration-1000"></div>
-                      </Button>
-                      
-                      <p className="text-[10px] sm:text-xs text-[#6B3FA0] mt-1.5 sm:mt-2 text-center font-medium">
-                        💡 Pay once to unlock all bidding rounds!
-                      </p>
+                      {/* Pay Now Button - Only show for logged in users */}
+                      {isLoggedIn ? (
+                        <>
+                          <Button
+                            onClick={() => onPayEntry?.(0, totalEntryFee)}
+                            disabled={isLoading || totalEntryFee === 0}
+                            className="w-full relative overflow-hidden bg-gradient-to-r from-[#6B3FA0] via-[#8456BC] to-[#9F7ACB] text-white hover:from-[#8456BC] hover:via-[#9F7ACB] hover:to-[#B99FD9] shadow-xl text-xs sm:text-sm md:text-base py-2 sm:py-2.5 md:py-3 rounded-xl font-bold transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] group/button disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <span className="relative z-10 flex items-center justify-center gap-1.5 sm:gap-2">
+                              <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              <span>Pay Now - ₹{totalEntryFee.toLocaleString('en-IN')}</span>
+                            </span>
+                            {/* Shimmer effect */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12 -translate-x-full group-hover/button:translate-x-full transition-transform duration-1000"></div>
+                          </Button>
+                          
+                          <p className="text-[10px] sm:text-xs text-[#6B3FA0] mt-1.5 sm:mt-2 text-center font-medium">
+                            💡 Pay once to unlock all bidding rounds!
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-[10px] sm:text-xs text-[#6B3FA0] mt-1.5 sm:mt-2 text-center font-medium">
+                          🔒 Login to pay entry fee and start bidding!
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
@@ -367,22 +375,6 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                       </div>
                     )}
                   </div>
-                  
-                  {/* Live badge with pulse animation */}
-                  {!isLoading && liveAuctions.length > 0 && (
-                    <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
-                      <div className="relative">
-                        {/* Pulsing glow */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] rounded-full blur-lg animate-pulse opacity-60"></div>
-                        
-                        {/* Badge */}
-                        <div className="relative bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold inline-flex items-center gap-1 sm:gap-1.5 shadow-xl">
-                          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-pulse"></span>
-                          LIVE AUCTION
-                        </div>
-                      </div>
-                    </div>
-                  )}
                   
                   {/* Bottom gradient fade */}
                   <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-white/90 via-purple-50/30 to-transparent pointer-events-none"></div>
