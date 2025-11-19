@@ -1,0 +1,506 @@
+// src/controllers/adminController.js
+const User = require('../models/User');
+const MasterAuction = require('../models/MasterAuction');
+const MasterBid = require('../models/MasterBid');
+const bcrypt = require('bcryptjs');
+
+/**
+ * Admin Login
+ * Checks if credentials match dream60@gmail.com / Dharsh@2003
+ * and if user exists in DB with ADMIN userType
+ */
+const adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+
+    // Validate request
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required',
+      });
+    }
+
+    // Check hardcoded admin credentials
+    const ADMIN_EMAIL = 'dream60@gmail.com';
+    const ADMIN_PASSWORD = 'Dharsh@2003';
+
+    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid admin credentials',
+      });
+    }
+
+    // Find or create admin user in database
+    let adminUser = await User.findOne({ email: ADMIN_EMAIL });
+
+    if (!adminUser) {
+      // Create admin user if doesn't exist
+      adminUser = new User({
+        username: 'admin_dream60',
+        mobile: '9999999999',
+        email: ADMIN_EMAIL,
+        password: ADMIN_PASSWORD,
+        userType: 'ADMIN',
+      });
+      await adminUser.save();
+    } else {
+      // Update userType to ADMIN if not already
+      if (adminUser.userType !== 'ADMIN') {
+        adminUser.userType = 'ADMIN';
+        await adminUser.save();
+      }
+    }
+
+    // Return admin user data
+    return res.status(200).json({
+      success: true,
+      message: 'Admin login successful',
+      user: {
+        user_id: adminUser.user_id,
+        username: adminUser.username,
+        email: adminUser.email,
+        userType: adminUser.userType,
+        userCode: adminUser.userCode,
+      },
+    });
+  } catch (err) {
+    console.error('Admin Login Error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+/**
+ * Get User Statistics
+ * Returns comprehensive user statistics for admin dashboard
+ */
+const getUserStatistics = async (req, res) => {
+  try {
+    // Verify admin access
+    const userId = req.query.user_id || req.body.user_id || req.headers['x-user-id'];
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized. Admin user_id required.',
+      });
+    }
+
+    const adminUser = await User.findOne({ user_id: userId });
+    if (!adminUser || adminUser.userType !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.',
+      });
+    }
+
+    // Calculate statistics
+    const [
+      totalUsers,
+      activeUsers,
+      deletedUsers,
+      totalAuctions,
+      totalWins,
+      totalAmountSpent,
+      totalAmountWon,
+      recentUsers,
+      topSpenders,
+      topWinners,
+    ] = await Promise.all([
+      User.countDocuments({ isDeleted: false }),
+      User.countDocuments({ isDeleted: false, userType: 'USER' }),
+      User.countDocuments({ isDeleted: true }),
+      User.aggregate([
+        { $match: { isDeleted: false } },
+        { $group: { _id: null, total: { $sum: '$totalAuctions' } } },
+      ]),
+      User.aggregate([
+        { $match: { isDeleted: false } },
+        { $group: { _id: null, total: { $sum: '$totalWins' } } },
+      ]),
+      User.aggregate([
+        { $match: { isDeleted: false } },
+        { $group: { _id: null, total: { $sum: '$totalAmountSpent' } } },
+      ]),
+      User.aggregate([
+        { $match: { isDeleted: false } },
+        { $group: { _id: null, total: { $sum: '$totalAmountWon' } } },
+      ]),
+      User.find({ isDeleted: false })
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .select('user_id username email mobile userCode createdAt totalAuctions totalWins')
+        .lean(),
+      User.find({ isDeleted: false })
+        .sort({ totalAmountSpent: -1 })
+        .limit(10)
+        .select('user_id username email userCode totalAmountSpent totalAuctions')
+        .lean(),
+      User.find({ isDeleted: false })
+        .sort({ totalWins: -1 })
+        .limit(10)
+        .select('user_id username email userCode totalWins totalAmountWon')
+        .lean(),
+    ]);
+
+    const statistics = {
+      overview: {
+        totalUsers,
+        activeUsers,
+        deletedUsers,
+        adminUsers: await User.countDocuments({ userType: 'ADMIN' }),
+      },
+      activity: {
+        totalAuctions: totalAuctions[0]?.total || 0,
+        totalWins: totalWins[0]?.total || 0,
+        totalAmountSpent: totalAmountSpent[0]?.total || 0,
+        totalAmountWon: totalAmountWon[0]?.total || 0,
+      },
+      recentUsers: recentUsers.map((u) => ({
+        user_id: u.user_id,
+        username: u.username,
+        email: u.email,
+        mobile: u.mobile,
+        userCode: u.userCode,
+        joinedAt: u.createdAt,
+        totalAuctions: u.totalAuctions || 0,
+        totalWins: u.totalWins || 0,
+      })),
+      topSpenders: topSpenders.map((u) => ({
+        user_id: u.user_id,
+        username: u.username,
+        email: u.email,
+        userCode: u.userCode,
+        totalAmountSpent: u.totalAmountSpent || 0,
+        totalAuctions: u.totalAuctions || 0,
+      })),
+      topWinners: topWinners.map((u) => ({
+        user_id: u.user_id,
+        username: u.username,
+        email: u.email,
+        userCode: u.userCode,
+        totalWins: u.totalWins || 0,
+        totalAmountWon: u.totalAmountWon || 0,
+      })),
+    };
+
+    return res.status(200).json({
+      success: true,
+      data: statistics,
+    });
+  } catch (err) {
+    console.error('Get User Statistics Error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+/**
+ * Get All Users (Admin)
+ * Returns detailed list of all users with pagination
+ */
+const getAllUsersAdmin = async (req, res) => {
+  try {
+    // Verify admin access
+    const userId = req.query.user_id || req.body.user_id || req.headers['x-user-id'];
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized. Admin user_id required.',
+      });
+    }
+
+    const adminUser = await User.findOne({ user_id: userId });
+    if (!adminUser || adminUser.userType !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.',
+      });
+    }
+
+    const { page = 1, limit = 20, search = '', includeDeleted = false } = req.query;
+    
+    const query = {};
+    
+    if (includeDeleted !== 'true') {
+      query.isDeleted = false;
+    }
+    
+    if (search) {
+      query.$or = [
+        { username: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { mobile: { $regex: search, $options: 'i' } },
+        { userCode: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const l = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
+    const p = Math.max(parseInt(page, 10) || 1, 1);
+    const skip = (p - 1) * l;
+
+    const [users, total] = await Promise.all([
+      User.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(l)
+        .select('-password')
+        .lean(),
+      User.countDocuments(query),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: users,
+      meta: {
+        total,
+        page: p,
+        limit: l,
+        pages: Math.ceil(total / l),
+      },
+    });
+  } catch (err) {
+    console.error('Get All Users Admin Error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+/**
+ * Create Master Auction (Admin)
+ */
+const createMasterAuctionAdmin = async (req, res) => {
+  try {
+    // Verify admin access
+    const userId = req.query.user_id || req.body.user_id || req.headers['x-user-id'];
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized. Admin user_id required.',
+      });
+    }
+
+    const adminUser = await User.findOne({ user_id: userId });
+    if (!adminUser || adminUser.userType !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.',
+      });
+    }
+
+    const payload = { ...req.body };
+    payload.createdBy = adminUser.user_id;
+
+    // If setting as active, deactivate others
+    if (payload.isActive === true) {
+      await MasterAuction.updateMany({ isActive: true }, { $set: { isActive: false } });
+    }
+
+    const masterAuction = await MasterAuction.create(payload);
+
+    return res.status(201).json({
+      success: true,
+      message: 'Master auction created successfully',
+      data: masterAuction,
+    });
+  } catch (err) {
+    console.error('Create Master Auction Admin Error:', err);
+
+    if (err.name === 'ValidationError') {
+      const messages = Object.values(err.errors || {}).map((v) => v.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: messages,
+      });
+    }
+
+    if (err.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'Duplicate master auction',
+      });
+    }
+
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+/**
+ * Get All Master Auctions (Admin)
+ */
+const getAllMasterAuctionsAdmin = async (req, res) => {
+  try {
+    // Verify admin access
+    const userId = req.query.user_id || req.body.user_id || req.headers['x-user-id'];
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized. Admin user_id required.',
+      });
+    }
+
+    const adminUser = await User.findOne({ user_id: userId });
+    if (!adminUser || adminUser.userType !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.',
+      });
+    }
+
+    const { page = 1, limit = 20, isActive } = req.query;
+    
+    const query = {};
+    
+    if (typeof isActive !== 'undefined') {
+      query.isActive = isActive === 'true';
+    }
+
+    const l = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
+    const p = Math.max(parseInt(page, 10) || 1, 1);
+    const skip = (p - 1) * l;
+
+    const [auctions, total] = await Promise.all([
+      MasterAuction.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(l)
+        .lean(),
+      MasterAuction.countDocuments(query),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: auctions,
+      meta: {
+        total,
+        page: p,
+        limit: l,
+        pages: Math.ceil(total / l),
+      },
+    });
+  } catch (err) {
+    console.error('Get All Master Auctions Admin Error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+/**
+ * Update Master Auction (Admin)
+ */
+const updateMasterAuctionAdmin = async (req, res) => {
+  try {
+    // Verify admin access
+    const userId = req.query.user_id || req.body.user_id || req.headers['x-user-id'];
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized. Admin user_id required.',
+      });
+    }
+
+    const adminUser = await User.findOne({ user_id: userId });
+    if (!adminUser || adminUser.userType !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.',
+      });
+    }
+
+    const { master_id } = req.params;
+    const updates = { ...req.body };
+    
+    // Remove fields that shouldn't be updated
+    delete updates.master_id;
+    delete updates.createdBy;
+    
+    updates.modifiedBy = adminUser.user_id;
+
+    // If setting as active, deactivate others
+    if (updates.isActive === true) {
+      await MasterAuction.updateMany(
+        { master_id: { $ne: master_id }, isActive: true },
+        { $set: { isActive: false } }
+      );
+    }
+
+    const auction = await MasterAuction.findOneAndUpdate(
+      { master_id },
+      updates,
+      { new: true, runValidators: true }
+    );
+
+    if (!auction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Master auction not found',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Master auction updated successfully',
+      data: auction,
+    });
+  } catch (err) {
+    console.error('Update Master Auction Admin Error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+/**
+ * Delete Master Auction (Admin)
+ */
+const deleteMasterAuctionAdmin = async (req, res) => {
+  try {
+    // Verify admin access
+    const userId = req.query.user_id || req.body.user_id || req.headers['x-user-id'];
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized. Admin user_id required.',
+      });
+    }
+
+    const adminUser = await User.findOne({ user_id: userId });
+    if (!adminUser || adminUser.userType !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.',
+      });
+    }
+
+    const { master_id } = req.params;
+
+    const auction = await MasterAuction.findOneAndDelete({ master_id });
+
+    if (!auction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Master auction not found',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Master auction deleted successfully',
+    });
+  } catch (err) {
+    console.error('Delete Master Auction Admin Error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+module.exports = {
+  adminLogin,
+  getUserStatistics,
+  getAllUsersAdmin,
+  createMasterAuctionAdmin,
+  getAllMasterAuctionsAdmin,
+  updateMasterAuctionAdmin,
+  deleteMasterAuctionAdmin,
+};
