@@ -734,6 +734,7 @@ interface DailyAuctionConfigItem {
   EntryFee: 'RANDOM' | 'MANUAL';
   minEntryFee: number;
   maxEntryFee: number;
+  FeeSplits?: { BoxA: number; BoxB: number };
   roundCount: number;
   roundConfig: RoundConfig[];
 }
@@ -1240,45 +1241,179 @@ const CreateMasterAuctionModal = ({
                         <option value="MANUAL">MANUAL</option>
                       </select>
                     </div>
+                  </div>
 
-                    <div>
-                      <label className="block text-sm font-semibold text-purple-700 mb-2">
-                        Min Entry Fee (₹)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={currentAuction.minEntryFee}
-                        onChange={(e) =>
-                          setCurrentAuction({
-                            ...currentAuction,
-                            minEntryFee: parseInt(e.target.value),
-                          })
-                        }
-                        className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
-                        required
-                      />
-                    </div>
+                  {/* Entry Fee Configuration - Conditional based on type */}
+                  <div className="bg-amber-50 rounded-lg p-4 border-2 border-amber-200">
+                    <h4 className="text-base font-bold text-amber-900 mb-3">
+                      Entry Fee Configuration
+                    </h4>
+                    
+                    {currentAuction.EntryFee === 'MANUAL' ? (
+                      /* MANUAL Mode - Show BoxA and BoxB inputs */
+                      <div>
+                        <p className="text-sm text-amber-700 mb-3">
+                          Enter the entry fee split values for Box A and Box B
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-semibold text-amber-700 mb-2">
+                              Box A Entry Fee (₹)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={currentAuction.FeeSplits?.BoxA || 0}
+                              onChange={(e) =>
+                                setCurrentAuction({
+                                  ...currentAuction,
+                                  FeeSplits: {
+                                    BoxA: parseInt(e.target.value) || 0,
+                                    BoxB: currentAuction.FeeSplits?.BoxB || 0,
+                                  },
+                                })
+                              }
+                              className="w-full px-4 py-2 border-2 border-amber-200 rounded-lg focus:outline-none focus:border-amber-500"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-amber-700 mb-2">
+                              Box B Entry Fee (₹)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={currentAuction.FeeSplits?.BoxB || 0}
+                              onChange={(e) =>
+                                setCurrentAuction({
+                                  ...currentAuction,
+                                  FeeSplits: {
+                                    BoxA: currentAuction.FeeSplits?.BoxA || 0,
+                                    BoxB: parseInt(e.target.value) || 0,
+                                  },
+                                })
+                              }
+                              className="w-full px-4 py-2 border-2 border-amber-200 rounded-lg focus:outline-none focus:border-amber-500"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-3 p-3 bg-amber-100 rounded-lg border border-amber-300">
+                          <p className="text-sm font-semibold text-amber-900">
+                            Total Entry Fee: ₹{((currentAuction.FeeSplits?.BoxA || 0) + (currentAuction.FeeSplits?.BoxB || 0)).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      /* RANDOM Mode - Show min/max and generate button */
+                      <div>
+                        <p className="text-sm text-amber-700 mb-3">
+                          Set the range for random entry fee generation
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <label className="block text-sm font-semibold text-amber-700 mb-2">
+                              Min Entry Fee (₹)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={currentAuction.minEntryFee}
+                              onChange={(e) =>
+                                setCurrentAuction({
+                                  ...currentAuction,
+                                  minEntryFee: parseInt(e.target.value) || 0,
+                                })
+                              }
+                              className="w-full px-4 py-2 border-2 border-amber-200 rounded-lg focus:outline-none focus:border-amber-500"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-amber-700 mb-2">
+                              Max Entry Fee (₹)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={currentAuction.maxEntryFee}
+                              onChange={(e) =>
+                                setCurrentAuction({
+                                  ...currentAuction,
+                                  maxEntryFee: parseInt(e.target.value) || 0,
+                                })
+                              }
+                              className="w-full px-4 py-2 border-2 border-amber-200 rounded-lg focus:outline-none focus:border-amber-500"
+                              required
+                            />
+                          </div>
+                        </div>
 
-                    <div>
-                      <label className="block text-sm font-semibold text-purple-700 mb-2">
-                        Max Entry Fee (₹)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={currentAuction.maxEntryFee}
-                        onChange={(e) =>
-                          setCurrentAuction({
-                            ...currentAuction,
-                            maxEntryFee: parseInt(e.target.value),
-                          })
-                        }
-                        className="w-full px-4 py-2 border-2 border-purple-200 rounded-lg focus:outline-none focus:border-purple-500"
-                        required
-                      />
-                    </div>
+                        {/* Generate Button */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const min = currentAuction.minEntryFee;
+                            const max = currentAuction.maxEntryFee;
+                            
+                            if (min >= max) {
+                              toast.error('Min entry fee must be less than max entry fee');
+                              return;
+                            }
 
+                            // Generate random BoxA and BoxB such that their sum is within min and max range
+                            const totalFee = Math.floor(Math.random() * (max - min + 1)) + min;
+                            const boxA = Math.floor(Math.random() * (totalFee + 1));
+                            const boxB = totalFee - boxA;
+
+                            setCurrentAuction({
+                              ...currentAuction,
+                              FeeSplits: { BoxA: boxA, BoxB: boxB },
+                            });
+                            
+                            toast.success(`Generated: Box A = ₹${boxA}, Box B = ₹${boxB}`);
+                          }}
+                          className="w-full px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                        >
+                          <RefreshCw className="w-5 h-5" />
+                          Generate Entry Fee
+                        </button>
+
+                        {/* Display Generated Values */}
+                        {currentAuction.FeeSplits && (
+                          <div className="mt-4 p-4 bg-amber-100 rounded-lg border-2 border-amber-300">
+                            <p className="text-sm font-bold text-amber-900 mb-2">Generated Entry Fee Split:</p>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="bg-white p-3 rounded-lg border border-amber-200">
+                                <p className="text-xs text-amber-600 font-semibold mb-1">Box A</p>
+                                <p className="text-xl font-bold text-amber-900">
+                                  ₹{currentAuction.FeeSplits.BoxA.toLocaleString()}
+                                </p>
+                              </div>
+                              <div className="bg-white p-3 rounded-lg border border-amber-200">
+                                <p className="text-xs text-amber-600 font-semibold mb-1">Box B</p>
+                                <p className="text-xl font-bold text-amber-900">
+                                  ₹{currentAuction.FeeSplits.BoxB.toLocaleString()}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="mt-3 pt-3 border-t border-amber-300">
+                              <p className="text-sm font-semibold text-amber-900">
+                                Total: ₹{(currentAuction.FeeSplits.BoxA + currentAuction.FeeSplits.BoxB).toLocaleString()}
+                                <span className="text-xs text-amber-600 ml-2">
+                                  (Range: ₹{currentAuction.minEntryFee} - ₹{currentAuction.maxEntryFee})
+                                </span>
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Round Count */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-purple-700 mb-2">
                         Round Count
