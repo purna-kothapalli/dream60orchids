@@ -93,6 +93,21 @@ function normalizeMasterAuctionPayload(raw = {}) {
   return normalizedTop;
 }
 
+/**
+ * Helper: Generate random BoxA and BoxB fees that add up to a total within min/max range
+ */
+function generateRandomFeeSplits(minEntryFee, maxEntryFee) {
+  // Generate random total fee within range
+  const totalFee = Math.floor(Math.random() * (maxEntryFee - minEntryFee + 1)) + minEntryFee;
+  
+  // Split randomly - BoxA gets 30-70% of total
+  const splitPercentage = Math.random() * 0.4 + 0.3; // 0.3 to 0.7
+  const BoxA = Math.floor(totalFee * splitPercentage);
+  const BoxB = totalFee - BoxA;
+  
+  return { BoxA, BoxB };
+}
+
 const mongoose = require('mongoose');
 
 // require MasterAuction model (try common naming variations so import is resilient)
@@ -279,6 +294,21 @@ const createMasterAuction = async (req, res) => {
       });
     }
     payload.createdBy = creatorId;
+
+    // Process dailyAuctionConfig for RANDOM entry fees
+    if (Array.isArray(payload.dailyAuctionConfig)) {
+      payload.dailyAuctionConfig = payload.dailyAuctionConfig.map((auction) => {
+        if (auction.entryFee === 'RANDOM' && auction.minEntryFee != null && auction.maxEntryFee != null) {
+          // Generate random BoxA and BoxB fees
+          const feeSplits = generateRandomFeeSplits(auction.minEntryFee, auction.maxEntryFee);
+          return {
+            ...auction,
+            feeSplits,
+          };
+        }
+        return auction;
+      });
+    }
 
     // If payload.isActive true => deactivate other active master auctions
     if (payload.isActive === true) {
