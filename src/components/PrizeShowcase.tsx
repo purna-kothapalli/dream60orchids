@@ -43,12 +43,9 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
   useEffect(() => {
     const fetchLiveAuctions = async () => {
       try {
-        // Format current date as YYYY-MM-DD
-        const today = new Date();
-        const dateStr = today.toISOString().split('T')[0];
         
         const response = await fetch(
-          `https://dev-api.dream60.com/scheduler/daily-auction?date=${dateStr}`
+          `https://dev-api.dream60.com/scheduler/daily-auction?date=2025-11-19`
         );
         const data = await response.json();
 
