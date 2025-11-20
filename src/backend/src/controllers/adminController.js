@@ -407,6 +407,35 @@ const getAllMasterAuctionsAdmin = async (req, res) => {
 };
 
 /**
+ * Get All Master Auctions Without Pagination (Admin)
+ * Returns all master auctions without pagination
+ */
+const getAllMasterAuctionsWithoutPagination = async (req, res) => {
+  try {
+    const { isActive } = req.query;
+    
+    const query = {};
+    
+    if (typeof isActive !== 'undefined') {
+      query.isActive = isActive === 'true';
+    }
+
+    const auctions = await MasterAuction.find(query)
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      data: auctions,
+      total: auctions.length,
+    });
+  } catch (err) {
+    console.error('Get All Master Auctions Without Pagination Error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+/**
  * Update Master Auction (Admin)
  */
 const updateMasterAuctionAdmin = async (req, res) => {
@@ -542,6 +571,7 @@ module.exports = {
   getAllUsersAdmin,
   createMasterAuctionAdmin,
   getAllMasterAuctionsAdmin,
+  getAllMasterAuctionsWithoutPagination,
   updateMasterAuctionAdmin,
   deleteMasterAuctionAdmin,
 };

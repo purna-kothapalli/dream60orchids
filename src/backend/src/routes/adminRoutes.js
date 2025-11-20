@@ -7,6 +7,7 @@ const {
   getAllUsersAdmin,
   createMasterAuctionAdmin,
   getAllMasterAuctionsAdmin,
+  getAllMasterAuctionsWithoutPagination,
   updateMasterAuctionAdmin,
   deleteMasterAuctionAdmin,
 } = require('../controllers/adminController');
@@ -375,6 +376,39 @@ router.get('/users', getAllUsersAdmin);
  */
 router.get('/master-auctions', getAllMasterAuctionsAdmin);
 router.post('/master-auctions', createMasterAuctionAdmin);
+
+/**
+ * @swagger
+ * /admin/master-auctions/all:
+ *   get:
+ *     summary: GET ALL MASTER AUCTIONS WITHOUT PAGINATION (ADMIN)
+ *     description: Get all master auctions without pagination (no authentication required)
+ *     tags: [Admin]
+ *     parameters:
+ *       - name: isActive
+ *         in: query
+ *         schema:
+ *           type: boolean
+ *     responses:
+ *       200:
+ *         description: Master auctions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 total:
+ *                   type: number
+ *       500:
+ *         description: Server error
+ */
+router.get('/master-auctions/all', getAllMasterAuctionsWithoutPagination);
 
 /**
  * @swagger
