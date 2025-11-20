@@ -53,8 +53,8 @@ export function AuctionSchedule() {
       hour: auctionHour,
       status: auction.Status?.toLowerCase() || 'upcoming',
       prize: {
-        name: auction.auctionName,
-        value: auction.prizeValue,
+        name: auction.auctionName || 'Prize',
+        value: auction.prizeValue || 0,
         image: auction.imageUrl || null // NO FALLBACK - null if not provided
       },
       winner: auction.Status === 'COMPLETED' ? `Winner${Math.floor(Math.random() * 999)}` : null
