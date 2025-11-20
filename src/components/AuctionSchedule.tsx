@@ -27,7 +27,13 @@ export function AuctionSchedule() {
         const data = await response.json();
         
         if (data.success && data.data) {
-          setAuctions(data.data);
+          // Filter out any null/undefined auctions and validate required fields
+          const validAuctions = data.data.filter((auction: AuctionConfig | null | undefined) => 
+            auction && 
+            auction.auctionId && 
+            auction.TimeSlot
+          );
+          setAuctions(validAuctions);
         }
       } catch (error) {
         console.error('Error fetching auctions:', error);
@@ -51,11 +57,11 @@ export function AuctionSchedule() {
     return {
       time: timeStr,
       hour: auctionHour,
-      status: auction.Status.toLowerCase(),
+      status: (auction.Status?.toLowerCase() || 'upcoming') as string,
       prize: {
-        name: auction.auctionName,
-        value: auction.prizeValue,
-        image: auction.imageUrl || null // NO FALLBACK - null if not provided
+        name: auction.auctionName || 'Prize',
+        value: auction.prizeValue || 0,
+        image: auction.imageUrl || null
       },
       winner: auction.Status === 'COMPLETED' ? `Winner${Math.floor(Math.random() * 999)}` : null
     };
