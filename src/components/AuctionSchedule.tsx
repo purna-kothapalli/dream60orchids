@@ -23,7 +23,7 @@ export function AuctionSchedule() {
   useEffect(() => {
     const fetchAuctions = async () => {
       try {
-        const response = await fetch('http://localhost:5000/admin/master-auctions?page=1&limit=20');
+        const response = await fetch('http://localhost:5000/admin/master-auctions');
         const data = await response.json();
         
         if (data.success && data.data) {
