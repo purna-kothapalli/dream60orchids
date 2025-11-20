@@ -79,7 +79,7 @@ export function ForgotPasswordPage({
         setHintOtp(null); // clear previous hint
         try {
             const res = await fetch(
-                "https://dev-api.dream60.com/auth/send-otp",
+                "http://localhost:5000/auth/send-otp",
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -120,7 +120,7 @@ export function ForgotPasswordPage({
         if (!validateOtp()) return;
         setIsLoading(true);
         try {
-            const res = await fetch("https://dev-api.dream60.com/auth/verify-otp", {
+            const res = await fetch("http://localhost:5000/auth/verify-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ mobile, otp }),
@@ -145,7 +145,7 @@ export function ForgotPasswordPage({
         setIsLoading(true);
         try {
             const res = await fetch(
-                "https://dev-api.dream60.com/auth/reset-password",
+                "http://localhost:5000/auth/reset-password",
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -175,12 +175,13 @@ export function ForgotPasswordPage({
         setIsLoading(true);
         setHintOtp(null);
         try {
-            const res = await fetch("https://dev-api.dream60.com/auth/resend-otp", {
+            const res = await fetch("http://localhost:5000/auth/resend-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ mobile }),
             });
 
+            // safe parse
             const data = await (async () => {
                 try {
                     return await res.json();
@@ -300,8 +301,8 @@ export function ForgotPasswordPage({
                                         <p className="text-xs text-purple-600 mt-1">
                                             Hint otp:{" "}
                                             <span className="font-mono text-sm text-purple-800 bg-purple-50 px-1 rounded">
-                        {hintOtp}
-                      </span>
+                                                {hintOtp}
+                                            </span>
                                         </p>
                                     )}
                                     {errors.otp && (

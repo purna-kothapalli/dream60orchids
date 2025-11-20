@@ -30,7 +30,7 @@ const sendOtp = async () => {
   setLoading(true);
   setError(null);
   try {
-    const response = await fetch('https://dev-api.dream60.com/auth/send-otp', {
+    const response = await fetch('http://localhost:5000/auth/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(buildRequestBody()),
@@ -71,7 +71,7 @@ const updateDetails = async () => {
       isMobile: type === "phone"
     };
 
-    const res = await fetch("https://dev-api.dream60.com/auth/updateUserDetails", {
+    const res = await fetch("http://localhost:5000/auth/updateUserDetails", {
       method: "PUT", 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -100,7 +100,7 @@ const verifyOtp = async (otpCode: string) => {
       ...(type === 'email' ? { email: recipient } : { mobile: recipient }),
     };
 
-    const response = await fetch('https://dev-api.dream60.com/auth/verify-otp', {
+    const response = await fetch('http://localhost:5000/auth/verify-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
