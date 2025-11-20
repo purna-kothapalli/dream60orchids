@@ -100,51 +100,51 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50/80 via-white/90 to-purple-100/60 rounded-[24px]"></div>
         <div className="absolute inset-0 backdrop-blur-2xl bg-white/50 rounded-[24px]"></div>
         
-        {/* Content container - Reduced padding */}
-        <div className="relative backdrop-blur-md bg-white/30 rounded-[24px] p-3 sm:p-4 md:p-5 border border-white/60 shadow-2xl">
+        {/* Content container - Further reduced padding */}
+        <div className="relative backdrop-blur-md bg-white/30 rounded-[24px] p-2.5 sm:p-3 md:p-4 border border-white/60 shadow-2xl">
           
-          <div className="grid md:grid-cols-2 gap-3 sm:gap-4 md:gap-5 items-start">
+          <div className="grid md:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4 items-start">
             {/* Left Content Section */}
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2 sm:space-y-2.5 md:space-y-3">
               
-              {/* Header with Icon */}
-              <div className="flex items-center space-x-2 sm:space-x-3">
+              {/* Header with Icon - Smaller */}
+              <div className="flex items-center space-x-1.5 sm:space-x-2">
                 <div className="relative group/icon">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#8456BC] to-[#B99FD9] rounded-xl blur-lg opacity-50 group-hover/icon:opacity-70 transition-opacity"></div>
-                  <div className="relative bg-gradient-to-br from-[#8456BC] to-[#B99FD9] p-1.5 sm:p-2 rounded-xl shadow-lg">
-                    <Gift className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#8456BC] to-[#B99FD9] rounded-lg blur-lg opacity-50 group-hover/icon:opacity-70 transition-opacity"></div>
+                  <div className="relative bg-gradient-to-br from-[#8456BC] to-[#B99FD9] p-1 sm:p-1.5 rounded-lg shadow-lg">
+                    <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
                   </div>
                 </div>
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-[#3A2257] via-[#53317B] to-[#6B3FA0] bg-clip-text text-transparent">
+                <h2 className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-[#3A2257] via-[#53317B] to-[#6B3FA0] bg-clip-text text-transparent">
                   Current Prize
                 </h2>
               </div>
               
-              {/* Prize Title */}
+              {/* Prize Title - Smaller */}
               <div className="relative">
-                <div className="absolute -inset-2 bg-gradient-to-r from-[#9F7ACB]/20 via-[#B99FD9]/15 to-[#8456BC]/20 rounded-2xl blur-md"></div>
-                <div className="relative backdrop-blur-sm bg-white/40 rounded-xl p-2 sm:p-3">
+                <div className="absolute -inset-1.5 bg-gradient-to-r from-[#9F7ACB]/20 via-[#B99FD9]/15 to-[#8456BC]/20 rounded-xl blur-md"></div>
+                <div className="relative backdrop-blur-sm bg-white/40 rounded-lg p-1.5 sm:p-2">
                   {isLoading ? (
-                    <div className="h-8 bg-gradient-to-r from-purple-200 to-purple-300 rounded-lg animate-pulse"></div>
+                    <div className="h-6 bg-gradient-to-r from-purple-200 to-purple-300 rounded-lg animate-pulse"></div>
                   ) : (
-                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-[#53317B] via-[#6B3FA0] to-[#8456BC] bg-clip-text text-transparent leading-tight">
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-[#53317B] via-[#6B3FA0] to-[#8456BC] bg-clip-text text-transparent leading-tight">
                       {displayPrize}
                     </h3>
                   )}
                 </div>
               </div>
               
-              {/* Stats Row */}
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              {/* Stats Row - Smaller */}
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 {/* Prize Value */}
                 <div className="group/stat relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#8456BC]/10 to-[#9F7ACB]/10 rounded-xl blur group-hover/stat:blur-md transition-all"></div>
-                  <div className="relative backdrop-blur-xl bg-white/70 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 border border-purple-200/40 shadow-sm inline-flex items-center space-x-1.5 sm:space-x-2">
-                    <IndianRupee className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#6B3FA0]" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#8456BC]/10 to-[#9F7ACB]/10 rounded-lg blur group-hover/stat:blur-md transition-all"></div>
+                  <div className="relative backdrop-blur-xl bg-white/70 rounded-lg px-2 py-1 sm:px-2.5 sm:py-1.5 border border-purple-200/40 shadow-sm inline-flex items-center space-x-1 sm:space-x-1.5">
+                    <IndianRupee className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#6B3FA0]" />
                     {isLoading ? (
-                      <div className="w-20 h-5 bg-gradient-to-r from-purple-200 to-purple-300 rounded animate-pulse"></div>
+                      <div className="w-16 h-4 bg-gradient-to-r from-purple-200 to-purple-300 rounded animate-pulse"></div>
                     ) : (
-                      <span className="text-sm sm:text-base md:text-lg font-bold bg-gradient-to-r from-[#53317B] to-[#6B3FA0] bg-clip-text text-transparent">
+                      <span className="text-xs sm:text-sm md:text-base font-bold bg-gradient-to-r from-[#53317B] to-[#6B3FA0] bg-clip-text text-transparent">
                         ₹{displayPrizeValue.toLocaleString('en-IN')}
                       </span>
                     )}
@@ -153,48 +153,46 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                 
                 {/* Participants */}
                 <div className="group/stat relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#9F7ACB]/10 to-[#B99FD9]/10 rounded-xl blur group-hover/stat:blur-md transition-all"></div>
-                  <div className="relative backdrop-blur-xl bg-white/70 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 border border-purple-200/40 shadow-sm inline-flex items-center space-x-1.5 sm:space-x-2">
-                    <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#6B3FA0]" />
-                    <span className="text-xs sm:text-sm text-[#53317B] font-semibold">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#9F7ACB]/10 to-[#B99FD9]/10 rounded-lg blur group-hover/stat:blur-md transition-all"></div>
+                  <div className="relative backdrop-blur-xl bg-white/70 rounded-lg px-2 py-1 sm:px-2.5 sm:py-1.5 border border-purple-200/40 shadow-sm inline-flex items-center space-x-1 sm:space-x-1.5">
+                    <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#6B3FA0]" />
+                    <span className="text-[10px] sm:text-xs text-[#53317B] font-semibold">
                       {currentPrize.totalParticipants} participants
                     </span>
                   </div>
                 </div>
               </div>
               
-              
-              
-              <div className="space-y-2.5 sm:space-y-3">
-                {/* Entry Fee Payment Section - Show for both logged in and logged out */}
+              <div className="space-y-2 sm:space-y-2.5">
+                {/* Entry Fee Payment Section */}
                 {!hasAnyPaidEntry && (
                   <div className="relative group/entry">
                     {/* Animated glow effect */}
-                    <div className="absolute -inset-[1px] bg-gradient-to-r from-[#8456BC]/30 via-[#9F7ACB]/30 to-[#B99FD9]/30 rounded-[18px] blur-md opacity-30 group-hover/entry:opacity-50 transition-opacity duration-500"></div>
+                    <div className="absolute -inset-[1px] bg-gradient-to-r from-[#8456BC]/30 via-[#9F7ACB]/30 to-[#B99FD9]/30 rounded-[16px] blur-md opacity-30 group-hover/entry:opacity-50 transition-opacity duration-500"></div>
                     
-                    <div className="relative backdrop-blur-2xl bg-white/85 rounded-2xl p-2.5 sm:p-3 md:p-4 border border-purple-200/50 shadow-xl">
-                      {/* Header */}
-                      <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                        <div className="bg-gradient-to-br from-[#8456BC] to-[#B99FD9] p-1 sm:p-1.5 rounded-xl shadow-md">
-                          <CreditCard className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
+                    <div className="relative backdrop-blur-2xl bg-white/85 rounded-xl p-2 sm:p-2.5 md:p-3 border border-purple-200/50 shadow-xl">
+                      {/* Header - Smaller */}
+                      <div className="flex items-center gap-1 sm:gap-1.5 mb-1.5 sm:mb-2">
+                        <div className="bg-gradient-to-br from-[#8456BC] to-[#B99FD9] p-0.5 sm:p-1 rounded-lg shadow-md">
+                          <CreditCard className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
                         </div>
-                        <span className="text-xs sm:text-sm md:text-base font-bold bg-gradient-to-r from-[#3A2257] to-[#6B3FA0] bg-clip-text text-transparent">
+                        <span className="text-[10px] sm:text-xs md:text-sm font-bold bg-gradient-to-r from-[#3A2257] to-[#6B3FA0] bg-clip-text text-transparent">
                           Pay Entry Fee to Join
                         </span>
                       </div>
                       
-                      {/* Entry Fee Breakdown - BoxA and BoxB */}
-                      <div className="space-y-1.5 sm:space-y-2 mb-2.5 sm:mb-3">
+                      {/* Entry Fee Breakdown - Smaller */}
+                      <div className="space-y-1 sm:space-y-1.5 mb-1.5 sm:mb-2">
                         {/* Box 1 - BoxA */}
-                        <div className="group/box relative backdrop-blur-lg bg-gradient-to-r from-purple-50/70 to-white/70 rounded-xl p-2 sm:p-2.5 border border-purple-100/40 transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
+                        <div className="group/box relative backdrop-blur-lg bg-gradient-to-r from-purple-50/70 to-white/70 rounded-lg p-1.5 sm:p-2 border border-purple-100/40 transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs sm:text-sm font-semibold text-[#53317B]">Box 1 (BoxA):</span>
-                            <div className="flex items-center gap-1">
-                              <IndianRupee className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8456BC]" />
+                            <span className="text-[10px] sm:text-xs font-semibold text-[#53317B]">Box 1 (BoxA):</span>
+                            <div className="flex items-center gap-0.5 sm:gap-1">
+                              <IndianRupee className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#8456BC]" />
                               {isLoading ? (
-                                <div className="w-12 h-4 bg-gradient-to-r from-purple-200 to-purple-300 rounded animate-pulse"></div>
+                                <div className="w-10 h-3 bg-gradient-to-r from-purple-200 to-purple-300 rounded animate-pulse"></div>
                               ) : (
-                                <span className="text-xs sm:text-sm md:text-base font-bold bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] bg-clip-text text-transparent">
+                                <span className="text-[10px] sm:text-xs md:text-sm font-bold bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] bg-clip-text text-transparent">
                                   {boxAFee.toLocaleString('en-IN')}
                                 </span>
                               )}
@@ -203,15 +201,15 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                         </div>
                         
                         {/* Box 2 - BoxB */}
-                        <div className="group/box relative backdrop-blur-lg bg-gradient-to-r from-purple-50/70 to-white/70 rounded-xl p-2 sm:p-2.5 border border-purple-100/40 transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
+                        <div className="group/box relative backdrop-blur-lg bg-gradient-to-r from-purple-50/70 to-white/70 rounded-lg p-1.5 sm:p-2 border border-purple-100/40 transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs sm:text-sm font-semibold text-[#53317B]">Box 2 (BoxB):</span>
-                            <div className="flex items-center gap-1">
-                              <IndianRupee className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8456BC]" />
+                            <span className="text-[10px] sm:text-xs font-semibold text-[#53317B]">Box 2 (BoxB):</span>
+                            <div className="flex items-center gap-0.5 sm:gap-1">
+                              <IndianRupee className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#8456BC]" />
                               {isLoading ? (
-                                <div className="w-12 h-4 bg-gradient-to-r from-purple-200 to-purple-300 rounded animate-pulse"></div>
+                                <div className="w-10 h-3 bg-gradient-to-r from-purple-200 to-purple-300 rounded animate-pulse"></div>
                               ) : (
-                                <span className="text-xs sm:text-sm md:text-base font-bold bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] bg-clip-text text-transparent">
+                                <span className="text-[10px] sm:text-xs md:text-sm font-bold bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] bg-clip-text text-transparent">
                                   {boxBFee.toLocaleString('en-IN')}
                                 </span>
                               )}
@@ -219,21 +217,21 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                           </div>
                         </div>
                         
-                        {/* Total = BoxA + BoxB */}
-                        <div className="relative mt-2 sm:mt-3 group/total">
-                          <div className="absolute inset-0 bg-gradient-to-r from-[#8456BC]/15 to-[#B99FD9]/15 rounded-xl blur-sm"></div>
-                          <div className="relative backdrop-blur-xl bg-gradient-to-r from-purple-100/85 to-purple-50/85 rounded-xl p-2 sm:p-2.5 md:p-3 border-2 border-[#9F7ACB]/40 shadow-lg">
+                        {/* Total - Smaller */}
+                        <div className="relative mt-1.5 sm:mt-2 group/total">
+                          <div className="absolute inset-0 bg-gradient-to-r from-[#8456BC]/15 to-[#B99FD9]/15 rounded-lg blur-sm"></div>
+                          <div className="relative backdrop-blur-xl bg-gradient-to-r from-purple-100/85 to-purple-50/85 rounded-lg p-1.5 sm:p-2 border-2 border-[#9F7ACB]/40 shadow-lg">
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-1 sm:gap-1.5">
-                                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8456BC] animate-pulse" />
-                                <span className="text-xs sm:text-sm md:text-base font-bold text-[#3A2257]">Total Entry Fee:</span>
-                              </div>
                               <div className="flex items-center gap-0.5 sm:gap-1">
-                                <IndianRupee className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B3FA0]" />
+                                <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#8456BC] animate-pulse" />
+                                <span className="text-[10px] sm:text-xs md:text-sm font-bold text-[#3A2257]">Total Entry Fee:</span>
+                              </div>
+                              <div className="flex items-center gap-0.5">
+                                <IndianRupee className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#6B3FA0]" />
                                 {isLoading ? (
-                                  <div className="w-16 h-6 bg-gradient-to-r from-purple-200 to-purple-300 rounded animate-pulse"></div>
+                                  <div className="w-12 h-4 bg-gradient-to-r from-purple-200 to-purple-300 rounded animate-pulse"></div>
                                 ) : (
-                                  <span className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-[#53317B] to-[#8456BC] bg-clip-text text-transparent">
+                                  <span className="text-sm sm:text-base md:text-lg font-bold bg-gradient-to-r from-[#53317B] to-[#8456BC] bg-clip-text text-transparent">
                                     {totalEntryFee.toLocaleString('en-IN')}
                                   </span>
                                 )}
@@ -243,28 +241,28 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                         </div>
                       </div>
 
-                      {/* Pay Now Button - Only show for logged in users */}
+                      {/* Pay Now Button - Smaller */}
                       {isLoggedIn ? (
                         <>
                           <Button
                             onClick={() => onPayEntry?.(0, totalEntryFee)}
                             disabled={isLoading || totalEntryFee === 0}
-                            className="w-full relative overflow-hidden bg-gradient-to-r from-[#6B3FA0] via-[#8456BC] to-[#9F7ACB] text-white hover:from-[#8456BC] hover:via-[#9F7ACB] hover:to-[#B99FD9] shadow-xl text-xs sm:text-sm md:text-base py-2 sm:py-2.5 md:py-3 rounded-xl font-bold transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] group/button disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full relative overflow-hidden bg-gradient-to-r from-[#6B3FA0] via-[#8456BC] to-[#9F7ACB] text-white hover:from-[#8456BC] hover:via-[#9F7ACB] hover:to-[#B99FD9] shadow-xl text-[10px] sm:text-xs md:text-sm py-1.5 sm:py-2 rounded-lg font-bold transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] group/button disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <span className="relative z-10 flex items-center justify-center gap-1.5 sm:gap-2">
-                              <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <span className="relative z-10 flex items-center justify-center gap-1 sm:gap-1.5">
+                              <CreditCard className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                               <span>Pay Now - ₹{totalEntryFee.toLocaleString('en-IN')}</span>
                             </span>
                             {/* Shimmer effect */}
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12 -translate-x-full group-hover/button:translate-x-full transition-transform duration-1000"></div>
                           </Button>
                           
-                          <p className="text-[10px] sm:text-xs text-[#6B3FA0] mt-1.5 sm:mt-2 text-center font-medium">
+                          <p className="text-[9px] sm:text-[10px] text-[#6B3FA0] mt-1 sm:mt-1.5 text-center font-medium">
                             💡 Pay once to unlock all bidding rounds!
                           </p>
                         </>
                       ) : (
-                        <p className="text-[10px] sm:text-xs text-[#6B3FA0] mt-1.5 sm:mt-2 text-center font-medium">
+                        <p className="text-[9px] sm:text-[10px] text-[#6B3FA0] mt-1 sm:mt-1.5 text-center font-medium">
                           🔒 Login to pay entry fee and start bidding!
                         </p>
                       )}
@@ -272,31 +270,31 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                   </div>
                 )}
 
-                {/* Entry Paid Success */}
+                {/* Entry Paid Success - Smaller */}
                 {hasAnyPaidEntry && (
                   <div className="relative group/success">
-                    <div className="absolute -inset-[1px] bg-gradient-to-r from-emerald-400/30 to-green-500/30 rounded-[18px] blur-md opacity-40"></div>
-                    <div className="relative backdrop-blur-2xl bg-gradient-to-br from-emerald-50/90 to-green-50/85 border-2 border-emerald-300/50 rounded-2xl p-2.5 sm:p-3 md:p-4 shadow-xl">
-                      <div className="flex items-center gap-1.5 sm:gap-2 text-emerald-700">
-                        <div className="bg-gradient-to-br from-emerald-500 to-green-600 p-1 sm:p-1.5 rounded-xl shadow-md">
-                          <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                    <div className="absolute -inset-[1px] bg-gradient-to-r from-emerald-400/30 to-green-500/30 rounded-[16px] blur-md opacity-40"></div>
+                    <div className="relative backdrop-blur-2xl bg-gradient-to-br from-emerald-50/90 to-green-50/85 border-2 border-emerald-300/50 rounded-xl p-2 sm:p-2.5 shadow-xl">
+                      <div className="flex items-center gap-1 sm:gap-1.5 text-emerald-700">
+                        <div className="bg-gradient-to-br from-emerald-500 to-green-600 p-0.5 sm:p-1 rounded-lg shadow-md">
+                          <CreditCard className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
                         </div>
-                        <span className="text-xs sm:text-sm md:text-base font-bold">✓ Entry Paid - Bidding Unlocked!</span>
+                        <span className="text-[10px] sm:text-xs md:text-sm font-bold">✓ Entry Paid - Bidding Unlocked!</span>
                       </div>
-                      <p className="text-[10px] sm:text-xs text-emerald-600 mt-1 ml-6 sm:ml-8 font-medium">
+                      <p className="text-[9px] sm:text-[10px] text-emerald-600 mt-0.5 ml-4 sm:ml-5 font-medium">
                         Round boxes are now available. Good luck!
                       </p>
                     </div>
                   </div>
                 )}
                 
-                {/* Info Box */}
+                {/* Info Box - Smaller */}
                 <div className="relative group/info">
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-100/50 to-purple-50/50 rounded-xl blur-sm"></div>
-                  <div className="relative backdrop-blur-xl bg-purple-50/50 rounded-xl p-2 sm:p-2.5 md:p-3 border border-purple-100/40 shadow-sm">
-                    <div className="flex items-start gap-1.5 sm:gap-2">
-                      <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8456BC] mt-0.5 flex-shrink-0" />
-                      <p className="text-[10px] sm:text-xs md:text-sm text-[#53317B] font-medium leading-relaxed">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-100/50 to-purple-50/50 rounded-lg blur-sm"></div>
+                  <div className="relative backdrop-blur-xl bg-purple-50/50 rounded-lg p-1.5 sm:p-2 border border-purple-100/40 shadow-sm">
+                    <div className="flex items-start gap-1 sm:gap-1.5">
+                      <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8456BC] mt-0.5 flex-shrink-0" />
+                      <p className="text-[9px] sm:text-[10px] md:text-xs text-[#53317B] font-medium leading-relaxed">
                         Round boxes open every 15 minutes. Highest bidder in the final round wins this amazing prize!
                       </p>
                     </div>
@@ -305,36 +303,50 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
               </div>
             </div>
             
-            {/* Right: Prize Image Section - Reduced size to match entry fee card */}
+            {/* Right: Prize Image Section - Matching left card height */}
             <div className="relative order-first md:order-last">
-              <div className="relative group/image h-full">
+              <div className="relative group/image">
                 {/* Outer animated glow */}
-                <div className="absolute -inset-[2px] bg-gradient-to-br from-[#8456BC]/40 via-[#9F7ACB]/30 to-[#B99FD9]/40 rounded-[20px] blur-xl opacity-30 group-hover/image:opacity-50 transition-all duration-700 animate-pulse"></div>
+                <div className="absolute -inset-[1.5px] bg-gradient-to-br from-[#8456BC]/40 via-[#9F7ACB]/30 to-[#B99FD9]/40 rounded-[16px] blur-lg opacity-30 group-hover/image:opacity-50 transition-all duration-700 animate-pulse"></div>
                 
-                {/* Glass card container - Reduced padding and height */}
-                <div className="relative overflow-hidden rounded-2xl backdrop-blur-2xl bg-white/75 border border-purple-200/50 p-2 sm:p-3 md:p-4 shadow-2xl h-full flex flex-col justify-center">
+                {/* Glass card container - Matching entry fee card styling */}
+                <div className="relative overflow-hidden rounded-xl backdrop-blur-2xl bg-white/75 border border-purple-200/50 p-2 sm:p-2.5 md:p-3 shadow-2xl">
                   {/* Gradient overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-100/20 via-transparent to-purple-200/20 opacity-0 group-hover/image:opacity-100 transition-opacity duration-700"></div>
                   
-                  {/* Image container - Reduced height to match entry fee card */}
-                  <div className="relative">
+                  {/* Image container - Reduced height */}
+                  <div className="relative flex items-center justify-center">
                     {isLoading ? (
-                      <div className="w-full h-48 sm:h-56 md:h-64 bg-gradient-to-r from-purple-200 to-purple-300 rounded-lg animate-pulse"></div>
+                      <div className="w-full h-32 sm:h-40 md:h-48 bg-gradient-to-r from-purple-200 to-purple-300 rounded-lg animate-pulse"></div>
                     ) : displayImage ? (
                       <img 
                         src={displayImage}
                         alt={displayPrize}
-                        className="w-full h-48 sm:h-56 md:h-64 object-contain transform group-hover/image:scale-105 transition-transform duration-700"
+                        className="w-full h-32 sm:h-40 md:h-48 object-contain transform group-hover/image:scale-105 transition-transform duration-700"
                       />
                     ) : (
-                      <div className="w-full h-48 sm:h-56 md:h-64 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center">
-                        <Trophy className="w-16 h-16 sm:w-20 sm:h-20 text-white opacity-50" />
+                      <div className="w-full h-32 sm:h-40 md:h-48 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center">
+                        <Trophy className="w-12 h-12 sm:w-16 sm:h-16 text-white opacity-50" />
                       </div>
                     )}
                   </div>
                   
-                  {/* Bottom gradient fade */}
-                  <div className="absolute bottom-0 left-0 right-0 h-12 sm:h-16 bg-gradient-to-t from-white/90 via-purple-50/30 to-transparent pointer-events-none"></div>
+                  {/* Live badge - Smaller */}
+                  <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2">
+                    <div className="relative">
+                      {/* Pulsing glow */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] rounded-full blur-md animate-pulse opacity-60"></div>
+                      
+                      {/* Badge */}
+                      <div className="relative bg-gradient-to-r from-[#6B3FA0] to-[#8456BC] text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold inline-flex items-center gap-0.5 sm:gap-1 shadow-lg">
+                        <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full animate-pulse"></span>
+                        LIVE AUCTION
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Bottom gradient fade - Smaller */}
+                  <div className="absolute bottom-0 left-0 right-0 h-8 sm:h-10 md:h-12 bg-gradient-to-t from-white/90 via-purple-50/30 to-transparent pointer-events-none"></div>
                 </div>
               </div>
             </div>
