@@ -79,7 +79,7 @@ export function ForgotPasswordPage({
         setHintOtp(null); // clear previous hint
         try {
             const res = await fetch(
-                "https://dev-api.dream60.com/auth/send-otp",
+                "http://localhost:5000/auth/send-otp",
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
