@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coins, Trophy, Clock, Menu, X, User, LogOut, Shield, FileText, History, ArrowLeft } from 'lucide-react';
+import { Coins, Trophy, Clock, Menu, X, User, LogOut, Shield, FileText, History, ArrowLeft, Maximize2 } from 'lucide-react';
 import { Button } from './ui/button';
 
 interface HeaderProps {
@@ -16,6 +16,12 @@ interface HeaderProps {
 
 export function Header({ user, onNavigate, onLogin, onLogout }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleOpenInNewTab = () => {
+    // Open current URL in a new tab
+    const url = window.location.href;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   const overlayVariants = {
     hidden: {
@@ -181,6 +187,20 @@ export function Header({ user, onNavigate, onLogin, onLogout }: HeaderProps) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
             >
+              {/* Full Screen Button */}
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  onClick={handleOpenInNewTab}
+                  variant="ghost"
+                  className="text-purple-600 hover:text-purple-700 hover:bg-purple-50/80 transition-all"
+                  size="sm"
+                  title="Open in full screen"
+                >
+                  <Maximize2 className="w-4 h-4 mr-1.5" />
+                  Full Screen
+                </Button>
+              </motion.div>
+
               {user ? (
                 <>
                   {/* User Stats */}
@@ -441,6 +461,22 @@ export function Header({ user, onNavigate, onLogin, onLogout }: HeaderProps) {
 
                 {/* Menu Items */}
                 <div className="p-4 space-y-2 max-h-[60vh] overflow-y-auto relative">
+                  {/* Full Screen Button - Always visible */}
+                  <motion.div variants={menuItemVariants}>
+                    <button
+                      onClick={() => { handleOpenInNewTab(); setMobileMenuOpen(false); }}
+                      className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-500 hover:to-purple-600 transition-all text-left group shadow-lg"
+                    >
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                        <Maximize2 className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="font-medium">Open in Full Screen</span>
+                    </button>
+                  </motion.div>
+
+                  {/* Divider */}
+                  <div className="border-t border-purple-200/50 my-3"></div>
+
                   {user ? (
                     <>
                       <motion.div variants={menuItemVariants}>
