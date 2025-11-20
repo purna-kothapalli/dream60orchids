@@ -33,11 +33,8 @@ export function AuctionSchedule() {
     const fetchAuctionSchedule = async () => {
       setIsLoading(true);
       try {
-        // Format current date as YYYY-MM-DD
-        const today = new Date();
-        const dateStr = today.toISOString().split('T')[0];
         
-        const response = await fetch(`https://dev-api.dream60.com/scheduler/daily-auction?date=${dateStr}`);
+        const response = await fetch(`https://dev-api.dream60.com/scheduler/daily-auction?date=2025-11-19`);
         const data = await response.json();
         
         if (response.ok && data.success && data.data?.dailyAuctionConfig) {
