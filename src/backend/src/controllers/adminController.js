@@ -369,24 +369,6 @@ const createMasterAuctionAdmin = async (req, res) => {
  */
 const getAllMasterAuctionsAdmin = async (req, res) => {
   try {
-    // Verify admin access
-    const userId = req.query.user_id || req.body.user_id || req.headers['x-user-id'];
-    
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized. Admin user_id required.',
-      });
-    }
-
-    const adminUser = await User.findOne({ user_id: userId });
-    if (!adminUser || adminUser.userType !== 'ADMIN') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. Admin privileges required.',
-      });
-    }
-
     const { page = 1, limit = 20, isActive } = req.query;
     
     const query = {};

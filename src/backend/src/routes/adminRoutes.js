@@ -322,15 +322,9 @@ router.get('/users', getAllUsersAdmin);
  * /admin/master-auctions:
  *   get:
  *     summary: GET ALL MASTER AUCTIONS (ADMIN)
- *     description: Get all master auctions with pagination (requires admin user_id)
+ *     description: Get all master auctions with pagination (no authentication required)
  *     tags: [Admin]
  *     parameters:
- *       - name: user_id
- *         in: query
- *         required: true
- *         schema:
- *           type: string
- *         description: Admin user ID
  *       - name: page
  *         in: query
  *         schema:
@@ -348,10 +342,6 @@ router.get('/users', getAllUsersAdmin);
  *     responses:
  *       200:
  *         description: Master auctions retrieved successfully
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Access denied - Admin privileges required
  *       500:
  *         description: Server error
  *   post:

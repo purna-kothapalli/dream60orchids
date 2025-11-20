@@ -119,7 +119,7 @@ export const AdminDashboard = ({ adminUser, onLogout }: AdminDashboardProps) => 
   const fetchMasterAuctions = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/admin/master-auctions?user_id=${adminUser.user_id}`
+        `http://localhost:5000/admin/master-auctions`
       );
       const data = await response.json();
 
