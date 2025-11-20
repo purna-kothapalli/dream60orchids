@@ -13,7 +13,10 @@ interface AuctionConfig {
   imageUrl?: string;
   prizeValue: number;
   Status: 'LIVE' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED';
-  master_id: string;
+  FeeSplits?: {
+    BoxA: number;
+    BoxB: number;
+  };
 }
 
 type TabFilter = 'all' | 'live' | 'upcoming' | 'completed';
@@ -30,25 +33,32 @@ export function AuctionSchedule() {
     const fetchAuctionSchedule = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('http://localhost:5000/api/v1/master-auctions/all-with-config');
+        // Format current date as YYYY-MM-DD
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0];
+        
+        const response = await fetch(`https://dev-api.dream60.com/scheduler/daily-auction?date=${dateStr}`);
         const data = await response.json();
         
-        if (response.ok && data.success) {
+        if (response.ok && data.success && data.data?.dailyAuctionConfig) {
           // Map API data to schedule format
-          const auctions = data.data.map((auction: any, index: number) => {
-            const [auctionHour] = auction.TimeSlot.split(':').map(Number);
-            const hour12 = auctionHour > 12 ? auctionHour - 12 : auctionHour;
+          const auctions = data.data.dailyAuctionConfig.map((auction: AuctionConfig, index: number) => {
+            const [auctionHour, auctionMinute] = auction.TimeSlot.split(':').map(Number);
+            const hour12 = auctionHour > 12 ? auctionHour - 12 : (auctionHour === 0 ? 12 : auctionHour);
             const period = auctionHour >= 12 ? 'PM' : 'AM';
-            const timeStr = `${hour12}:00 ${period}`;
+            const timeStr = `${hour12}:${auctionMinute?.toString().padStart(2, '0') || '00'} ${period}`;
             
+            // Map API Status to internal status
             let status = 'upcoming';
             let winner = null;
             
-            if (auctionHour < currentHour) {
+            if (auction.Status === 'LIVE') {
+              status = 'active';
+            } else if (auction.Status === 'COMPLETED') {
               status = 'completed';
               winner = `Winner${Math.floor(Math.random() * 999)}`;
-            } else if (auctionHour === currentHour) {
-              status = 'active';
+            } else if (auction.Status === 'UPCOMING') {
+              status = 'upcoming';
             }
             
             return {

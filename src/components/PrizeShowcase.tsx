@@ -10,8 +10,7 @@ interface AuctionConfig {
   imageUrl?: string;
   prizeValue: number;
   Status: 'LIVE' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED';
-  master_id: string;
-  feeSplits?: {
+  FeeSplits?: {
     BoxA: number;
     BoxB: number;
   };
@@ -41,40 +40,44 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
   const [boxAFee, setBoxAFee] = useState<number>(0);
   const [boxBFee, setBoxBFee] = useState<number>(0);
 
-useEffect(() => {
-  const fetchLiveAuctions = async () => {
-    try {
-      const response = await fetch(
-        'http://localhost:5000/admin/master-auctions?page=1&limit=20'
-      );
-      const data = await response.json();
-
-      if (data.success && data.data.length > 0) {
-        const allAuctions = data.data[0].dailyAuctionConfig;
-
-        // Filter only LIVE auctions
-        const live = allAuctions.filter(
-          (auction: AuctionConfig) => auction.Status === 'LIVE'
+  useEffect(() => {
+    const fetchLiveAuctions = async () => {
+      try {
+        // Format current date as YYYY-MM-DD
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0];
+        
+        const response = await fetch(
+          `https://dev-api.dream60.com/scheduler/daily-auction?date=${dateStr}`
         );
+        const data = await response.json();
 
-        setLiveAuctions(live);
+        if (data.success && data.data?.dailyAuctionConfig) {
+          const allAuctions = data.data.dailyAuctionConfig;
 
-        // Use the first live auction
-        if (live.length > 0) {
-          const first = live[0];
-          setBoxAFee(first.FeeSplits?.BoxA || 0);
-          setBoxBFee(first.FeeSplits?.BoxB || 0);
+          // Filter only LIVE auctions
+          const live = allAuctions.filter(
+            (auction: AuctionConfig) => auction.Status === 'LIVE'
+          );
+
+          setLiveAuctions(live);
+
+          // Use the first live auction
+          if (live.length > 0) {
+            const first = live[0];
+            setBoxAFee(first.FeeSplits?.BoxA || 0);
+            setBoxBFee(first.FeeSplits?.BoxB || 0);
+          }
         }
+      } catch (error) {
+        console.error('Error fetching live auctions:', error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching live auctions:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
-  fetchLiveAuctions();
-}, []);
+    fetchLiveAuctions();
+  }, []);
 
 
   const entryBoxes = currentPrize.boxes.filter(box => box.type === 'entry');
@@ -84,9 +87,9 @@ useEffect(() => {
   const totalEntryFee = boxAFee + boxBFee;
 
   // Use live auction data if available, otherwise use currentPrize
-const displayPrize = liveAuctions.length > 0 ? liveAuctions[0].auctionName : currentPrize.prize;
-const displayPrizeValue = liveAuctions.length > 0 ? liveAuctions[0].prizeValue : currentPrize.prizeValue;
-const displayImage = liveAuctions.length > 0 ? liveAuctions[0].imageUrl : null;
+  const displayPrize = liveAuctions.length > 0 ? liveAuctions[0].auctionName : currentPrize.prize;
+  const displayPrizeValue = liveAuctions.length > 0 ? liveAuctions[0].prizeValue : currentPrize.prizeValue;
+  const displayImage = liveAuctions.length > 0 ? liveAuctions[0].imageUrl : null;
 
 
   return (
