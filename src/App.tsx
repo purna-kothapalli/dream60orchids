@@ -229,7 +229,7 @@ export default function App() {
 const fetchAndSetUser = async (userId: string) => {
   try {
     const response = await fetch(
-      `http://localhost:5000/auth/me?user_id=${userId}`
+      `https://dev-api.dream60.com/auth/me?user_id=${userId}`
     );
 
     if (!response.ok) {

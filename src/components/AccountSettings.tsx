@@ -94,7 +94,7 @@ export function AccountSettings({ user, onBack, onNavigate, onDeleteAccount, onL
       }
 
       // Call API to mark account as deleted (isDeleted: true)
-      const res = await fetch("http://localhost:5000/auth/me", {
+      const res = await fetch("https://dev-api.dream60.com/auth/me", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -175,11 +175,12 @@ export function AccountSettings({ user, onBack, onNavigate, onDeleteAccount, onL
     setShowOTPVerification(false);
   };
 
+
   const handleChangePassword = async (currentPassword: string, newPassword: string) => {
     try {
       const userId = localStorage.getItem("user_id");
 
-      const res = await fetch("http://localhost:5000/auth/update-password", {
+      const res = await fetch("https://dev-api.dream60.com/auth/update-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -216,7 +217,7 @@ export function AccountSettings({ user, onBack, onNavigate, onDeleteAccount, onL
     try {
       const userId = localStorage.getItem("user_id");
 
-      const res = await fetch("http://localhost:5000/auth/me/preferences", {
+      const res = await fetch("https://dev-api.dream60.com/auth/me/preferences", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
