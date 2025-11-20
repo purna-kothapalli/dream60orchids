@@ -16,9 +16,12 @@ interface AuctionConfig {
   master_id: string;
 }
 
+type TabFilter = 'all' | 'live' | 'upcoming' | 'completed';
+
 export function AuctionSchedule() {
   const [auctions, setAuctions] = useState<AuctionConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabFilter>('all');
 
   useEffect(() => {
     const fetchAuctions = async () => {
@@ -51,15 +54,28 @@ export function AuctionSchedule() {
     return {
       time: timeStr,
       hour: auctionHour,
-      status: auction.Status.toLowerCase(),
+      status: auction.Status?.toLowerCase() || 'upcoming',
       prize: {
-        name: auction.auctionName,
-        value: auction.prizeValue,
-        image: auction.imageUrl || null // NO FALLBACK - null if not provided
+        name: auction.auctionName || 'Prize',
+        value: auction.prizeValue || 0,
+        image: auction.imageUrl || null
       },
       winner: auction.Status === 'COMPLETED' ? `Winner${Math.floor(Math.random() * 999)}` : null
     };
   });
+
+  // Filter schedule data based on active tab
+  const filteredSchedule = scheduleData.filter((auction) => {
+    if (activeTab === 'all') return true;
+    return auction.status === activeTab;
+  });
+
+  const tabs: { id: TabFilter; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'live', label: 'Live' },
+    { id: 'upcoming', label: 'Upcoming' },
+    { id: 'completed', label: 'Completed' },
+  ];
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -181,148 +197,201 @@ export function AuctionSchedule() {
               </p>
             </div>
           </div>
-        </CardHeader>
-        
-        <CardContent className="relative z-10">
-          <div className="space-y-3">
-            {scheduleData.map((auction, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05, duration: 0.4 }}
-              >
-                <div 
+
+          {/* Tabs with smooth glide animation */}
+          <div className="mt-4 relative bg-white/60 backdrop-blur-sm rounded-xl p-1.5 border border-purple-200/60 shadow-sm">
+            <div className="relative flex gap-1">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
                   className={`
-                    relative overflow-hidden rounded-xl border-2 transition-all duration-300
-                    ${auction.status === 'active' || auction.status === 'live'
-                      ? 'border-violet-300/70 bg-gradient-to-r from-violet-100/90 via-fuchsia-100/80 to-purple-100/70 shadow-xl shadow-purple-400/30 backdrop-blur-xl' 
-                      : auction.status === 'completed'
-                      ? 'border-purple-200/60 bg-gradient-to-r from-purple-50/80 to-violet-50/70 backdrop-blur-lg hover:shadow-lg'
-                      : 'border-purple-200/60 bg-gradient-to-r from-white/80 to-purple-50/70 backdrop-blur-lg hover:shadow-lg hover:border-purple-300/70'
+                    relative z-10 flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-300
+                    ${activeTab === tab.id 
+                      ? 'text-white' 
+                      : 'text-purple-700 hover:text-purple-900'
                     }
                   `}
                 >
-                  {/* Glassmorphism effect */}
-                  <div className="absolute inset-0 bg-white/30 backdrop-blur-sm pointer-events-none" />
-                  
-                  {/* Active auction pulse animation */}
-                  {(auction.status === 'active' || auction.status === 'live') && (
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-violet-400/20 to-fuchsia-400/20"
-                      animate={{
-                        opacity: [0.3, 0.6, 0.3],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
+                  {tab.label}
+                  {activeTab === tab.id && tab.id === 'live' && (
+                    <motion.span
+                      className="inline-block w-2 h-2 bg-white rounded-full ml-1.5"
+                      animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
                     />
                   )}
+                </button>
+              ))}
+              
+              {/* Animated glide indicator */}
+              <motion.div
+                className="absolute top-0 bottom-0 bg-gradient-to-r from-purple-600 to-violet-700 rounded-lg shadow-lg"
+                initial={false}
+                animate={{
+                  left: `${tabs.findIndex(t => t.id === activeTab) * (100 / tabs.length)}%`,
+                  width: `${100 / tabs.length}%`,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30,
+                }}
+              />
+            </div>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="relative z-10">
+          {filteredSchedule.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Calendar className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-purple-900 mb-2">No {activeTab === 'all' ? '' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Auctions</h3>
+              <p className="text-purple-600 text-sm">There are no {activeTab === 'all' ? '' : activeTab} auctions at the moment.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredSchedule.map((auction, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.4 }}
+                >
+                  <div 
+                    className={`
+                      relative overflow-hidden rounded-xl border-2 transition-all duration-300
+                      ${auction.status === 'active' || auction.status === 'live'
+                        ? 'border-violet-300/70 bg-gradient-to-r from-violet-100/90 via-fuchsia-100/80 to-purple-100/70 shadow-xl shadow-purple-400/30 backdrop-blur-xl' 
+                        : auction.status === 'completed'
+                        ? 'border-purple-200/60 bg-gradient-to-r from-purple-50/80 to-violet-50/70 backdrop-blur-lg hover:shadow-lg'
+                        : 'border-purple-200/60 bg-gradient-to-r from-white/80 to-purple-50/70 backdrop-blur-lg hover:shadow-lg hover:border-purple-300/70'
+                      }
+                    `}
+                  >
+                    {/* Glassmorphism effect */}
+                    <div className="absolute inset-0 bg-white/30 backdrop-blur-sm pointer-events-none" />
+                    
+                    {/* Active auction pulse animation */}
+                    {(auction.status === 'active' || auction.status === 'live') && (
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-violet-400/20 to-fuchsia-400/20"
+                        animate={{
+                          opacity: [0.3, 0.6, 0.3],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                      />
+                    )}
 
-                  <div className="relative z-10 p-3 sm:p-4">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                      {/* Left side - Time and Status */}
-                      <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-md bg-gradient-to-br from-purple-500 to-purple-700`}>
-                          <Clock className="w-6 h-6 text-white" />
+                    <div className="relative z-10 p-3 sm:p-4">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                        {/* Left side - Time and Status */}
+                        <div className="flex items-center gap-3">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-md bg-gradient-to-br from-purple-500 to-purple-700`}>
+                            <Clock className="w-6 h-6 text-white" />
+                          </div>
+                          
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-base sm:text-lg font-bold text-purple-900">{auction.time}</span>
+                              <Badge className={`${getStatusColor(auction.status)} text-xs flex items-center gap-2 rounded-xl`} >
+                                {(auction.status === 'active' || auction.status === 'live') && (
+                                  <motion.div
+                                    animate={{ scale: [1, 1.3, 1] }}
+                                    transition={{ duration: 2.0, repeat: Infinity, ease: "easeInOut" }}
+                                  >
+                                    <Radio className="w-3 h-4" />
+                                  </motion.div>
+                                )}
+                                {auction.status === 'upcoming' && <PlayCircle className="w-4 h-4" />}
+                                {getStatusText(auction.status)}
+                              </Badge>
+                            </div>
+                            <div className="text-xs text-purple-600 mt-0.5">
+                              Auction #{index + 1} of {filteredSchedule.length}
+                            </div>
+                          </div>
                         </div>
                         
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-base sm:text-lg font-bold text-purple-900">{auction.time}</span>
-                            <Badge className={`${getStatusColor(auction.status)} text-xs flex items-center gap-2 rounded-xl`} >
-                              {(auction.status === 'active' || auction.status === 'live') && (
-                                <motion.div
-                                  animate={{ scale: [1, 1.3, 1] }}
-                                  transition={{ duration: 2.0, repeat: Infinity, ease: "easeInOut" }}
-                                >
-                                  <Radio className="w-3 h-4" />
-                                </motion.div>
-                              )}
-                              {auction.status === 'upcoming' && <PlayCircle className="w-4 h-4" />}
-                              {getStatusText(auction.status)}
-                            </Badge>
+                        {/* Right side - Prize with Image or Placeholder */}
+                        <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-purple-200/50 w-full lg:w-80">
+                          <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-purple-300/60 shadow-md shrink-0">
+                            {auction.prize.image ? (
+                              <ImageWithFallback 
+                                src={auction.prize.image}
+                                alt={auction.prize.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                                <Trophy className="w-10 h-10 text-white" />
+                              </div>
+                            )}
                           </div>
-                          <div className="text-xs text-purple-600 mt-0.5">
-                            Auction #{index + 1} of {scheduleData.length}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1 text-xs text-purple-600 mb-1">
+                              <Trophy className="w-3 h-3" />
+                              <span>Prize</span>
+                            </div>
+                            <div className="font-bold text-purple-900 text-sm mb-1 line-clamp-2 h-10 leading-5">
+                              {auction.prize.name}
+                            </div>
+                            <div className="flex items-center gap-0.5 text-violet-700 font-semibold text-sm">
+                              <IndianRupee className="w-3.5 h-3.5" />
+                              <span>{auction.prize.value.toLocaleString('en-IN')}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
                       
-                      {/* Right side - Prize with Image or Placeholder */}
-                      <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-purple-200/50 w-full lg:w-80">
-                        <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-purple-300/60 shadow-md shrink-0">
-                          {auction.prize.image ? (
-                            <ImageWithFallback 
-                              src={auction.prize.image}
-                              alt={auction.prize.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-                              <Trophy className="w-10 h-10 text-white" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1 text-xs text-purple-600 mb-1">
-                            <Trophy className="w-3 h-3" />
-                            <span>Prize</span>
-                          </div>
-                          <div className="font-bold text-purple-900 text-sm mb-1 line-clamp-2 h-10 leading-5">
-                            {auction.prize.name}
-                          </div>
-                          <div className="flex items-center gap-0.5 text-violet-700 font-semibold text-sm">
-                            <IndianRupee className="w-3.5 h-3.5" />
-                            <span>{auction.prize.value.toLocaleString('en-IN')}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Winner info for completed auctions */}
-                    {auction.winner && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-3 flex items-center gap-2 bg-purple-50/80 backdrop-blur-sm rounded-xl p-2 border border-purple-200/60"
-                      >
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center">
-                          <Trophy className="w-4 h-4 text-white" />
-                        </div>
-                        <div>
-                          <div className="text-xs text-purple-700">Winner</div>
-                          <div className="text-sm font-bold text-purple-900">{auction.winner}</div>
-                        </div>
-                      </motion.div>
-                    )}
-                    
-                    {/* Active auction CTA */}
-                    {(auction.status === 'active' || auction.status === 'live') && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-3 flex items-center gap-2 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 backdrop-blur-sm rounded-xl p-2.5 border-2 border-violet-300/60"
-                      >
-                        <motion.div
-                          animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ duration: 1, repeat: Infinity }}
+                      {/* Winner info for completed auctions */}
+                      {auction.winner && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-3 flex items-center gap-2 bg-purple-50/80 backdrop-blur-sm rounded-xl p-2 border border-purple-200/60"
                         >
-                          <Zap className="w-5 h-5 text-violet-600" />
+                          <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center">
+                            <Trophy className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <div className="text-xs text-purple-700">Winner</div>
+                            <div className="text-sm font-bold text-purple-900">{auction.winner}</div>
+                          </div>
                         </motion.div>
-                        <div>
-                          <div className="text-sm font-bold text-violet-900">Entry opens 5 minutes early!</div>
-                          <div className="text-xs text-violet-700">Pay one entry fee to unlock all 6 boxes (split into Box 1 & 2)</div>
-                        </div>
-                      </motion.div>
-                    )}
+                      )}
+                      
+                      {/* Active auction CTA */}
+                      {(auction.status === 'active' || auction.status === 'live') && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-3 flex items-center gap-2 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 backdrop-blur-sm rounded-xl p-2.5 border-2 border-violet-300/60"
+                        >
+                          <motion.div
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ duration: 1, repeat: Infinity }}
+                          >
+                            <Zap className="w-5 h-5 text-violet-600" />
+                          </motion.div>
+                          <div>
+                            <div className="text-sm font-bold text-violet-900">Entry opens 5 minutes early!</div>
+                            <div className="text-xs text-violet-700">Pay one entry fee to unlock all 6 boxes (split into Box 1 & 2)</div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
           
           {/* Box Schedule Info - 6 BOXES TOTAL */}
           <motion.div
