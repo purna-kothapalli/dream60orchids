@@ -421,15 +421,23 @@ const fetchAndSetUser = async (userId: string) => {
 
 useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-    if (!currentUser?.id) return;
-
-  // Function to fetch user data again when page changes
-  const restoreUser = async () => {
-    await fetchAndSetUser(currentUser.id);  // Fetch user data from API
-  };
-
-  restoreUser();
   }, [currentPage]);
+
+  // Only refetch user data when navigating to specific pages that need it
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    
+    // Only refetch for pages that need fresh user data
+    const pagesNeedingRefresh = ['game', 'profile', 'history'];
+    if (!pagesNeedingRefresh.includes(currentPage)) return;
+
+    const restoreUser = async () => {
+      await fetchAndSetUser(currentUser.id);
+    };
+
+    restoreUser();
+  }, [currentPage, currentUser?.id]);
+  
   // Timer to automatically open boxes based on time schedule
   useEffect(() => {
     const interval = setInterval(() => {
