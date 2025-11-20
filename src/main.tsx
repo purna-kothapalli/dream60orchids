@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/globals.css';
 import { Toaster } from 'sonner';
+import { BrowserRouter } from 'react-router-dom';
 
 if (typeof window !== "undefined") {
   const sendToParent = (data: any) => {
@@ -65,13 +66,15 @@ if (typeof window !== "undefined") {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
-    <Toaster 
-      position="top-right"
-      expand={false}
-      richColors
-      closeButton
-      duration={4000}
-    />
+    <BrowserRouter>
+      <App />
+      <Toaster 
+        position="top-right"
+        expand={false}
+        richColors
+        closeButton
+        duration={4000}
+      />
+    </BrowserRouter>
   </React.StrictMode>
 );

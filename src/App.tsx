@@ -21,16 +21,8 @@ import { AuctionHistory } from './components/AuctionHistory';
 import { AuctionDetailsPage } from './components/AuctionDetailsPage';
 import { AdminLogin } from './components/AdminLogin';
 import { AdminDashboard } from './components/AdminDashboard';
-// import { EntrySuccessAnimation } from './components/EntrySuccessAnimation';
-// import { motion, AnimatePresence } from 'motion/react';
 import { ForgotPasswordPage } from "./components/ForgotPasswordPage";
 import { toast } from 'sonner';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { Toaster } from '@/components/ui/toaster';
-import { Sonner } from '@/components/ui/sonner';
-import { HoverReceiver } from "@/visual-edits/VisualEditsMessenger";
-import { BrowserRouter } from 'react-router-dom';
 
 const getCurrentAuctionSlot = () => {
   const now = new Date();
