@@ -173,21 +173,30 @@ type Auction = {
     boxes: Box[];
 };
 export default function App() {
-  // Check if URL path is /admin and redirect to admin login
-  useEffect(() => {
+  // Initialize currentPage based on URL path
+  const [currentPage, setCurrentPage] = useState(() => {
     const path = window.location.pathname;
+    
     if (path === '/admin' || path === '/admin/') {
-      // Check if already logged in as admin
       const adminUserId = localStorage.getItem('admin_user_id');
-      if (adminUserId) {
-        setCurrentPage('admin-dashboard');
-      } else {
-        setCurrentPage('admin-login');
-      }
+      return adminUserId ? 'admin-dashboard' : 'admin-login';
     }
-  }, []);
+    if (path === '/login') return 'login';
+    if (path === '/signup') return 'signup';
+    if (path === '/forgot-password') return 'forgot';
+    if (path === '/rules') return 'rules';
+    if (path === '/participation') return 'participation';
+    if (path === '/terms') return 'terms';
+    if (path === '/privacy') return 'privacy';
+    if (path === '/support') return 'support';
+    if (path === '/contact') return 'contact';
+    if (path === '/profile') return 'profile';
+    if (path === '/history') return 'history';
+    
+    // Default to game page
+    return 'game';
+  });
 
-  const [currentPage, setCurrentPage] = useState('game');
   const [currentUser, setCurrentUser] = useState<{
   id: string;
   username: string;
@@ -370,7 +379,7 @@ const fetchAndSetUser = async (userId: string) => {
     try {
       // Check for admin session first
       const adminUserId = localStorage.getItem("admin_user_id");
-      if (adminUserId) {
+      if (adminUserId && (currentPage === 'admin-login' || currentPage === 'admin-dashboard')) {
         const adminEmail = localStorage.getItem("admin_email");
         setAdminUser({
           user_id: adminUserId,
@@ -379,7 +388,9 @@ const fetchAndSetUser = async (userId: string) => {
           userType: 'ADMIN',
           userCode: '#ADMIN',
         });
-        setCurrentPage("admin-dashboard");
+        if (currentPage === 'admin-login') {
+          setCurrentPage("admin-dashboard");
+        }
         return;
       }
 
@@ -396,8 +407,8 @@ const fetchAndSetUser = async (userId: string) => {
         return;
       }
 
-      // Session restored successfully
-      setCurrentPage("game");
+      // Session restored successfully - but don't override the current page
+      // User navigated to a specific URL, respect it
 
     } catch (error) {
       console.error("Session restore error:", error);
