@@ -100,12 +100,12 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50/80 via-white/90 to-purple-100/60 rounded-[24px]"></div>
         <div className="absolute inset-0 backdrop-blur-2xl bg-white/50 rounded-[24px]"></div>
         
-        {/* Content container */}
-        <div className="relative backdrop-blur-md bg-white/30 rounded-[24px] p-3 sm:p-5 md:p-7 border border-white/60 shadow-2xl">
+        {/* Content container - Reduced padding */}
+        <div className="relative backdrop-blur-md bg-white/30 rounded-[24px] p-3 sm:p-4 md:p-5 border border-white/60 shadow-2xl">
           
-          <div className="grid md:grid-cols-2 gap-5 sm:gap-6 md:gap-8 items-center">
+          <div className="grid md:grid-cols-2 gap-3 sm:gap-4 md:gap-5 items-start">
             {/* Left Content Section */}
-            <div className="space-y-3 sm:space-y-4 md:space-y-5">
+            <div className="space-y-3 sm:space-y-4">
               
               {/* Header with Icon */}
               <div className="flex items-center space-x-2 sm:space-x-3">
@@ -127,7 +127,7 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
                   {isLoading ? (
                     <div className="h-8 bg-gradient-to-r from-purple-200 to-purple-300 rounded-lg animate-pulse"></div>
                   ) : (
-                    <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-[#53317B] via-[#6B3FA0] to-[#8456BC] bg-clip-text text-transparent leading-tight">
+                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-[#53317B] via-[#6B3FA0] to-[#8456BC] bg-clip-text text-transparent leading-tight">
                       {displayPrize}
                     </h3>
                   )}
@@ -305,36 +305,36 @@ export function PrizeShowcase({ currentPrize, onPayEntry, isLoggedIn }: PrizeSho
               </div>
             </div>
             
-            {/* Right: Prize Image Section */}
+            {/* Right: Prize Image Section - Reduced size to match entry fee card */}
             <div className="relative order-first md:order-last">
-              <div className="relative group/image">
+              <div className="relative group/image h-full">
                 {/* Outer animated glow */}
                 <div className="absolute -inset-[2px] bg-gradient-to-br from-[#8456BC]/40 via-[#9F7ACB]/30 to-[#B99FD9]/40 rounded-[20px] blur-xl opacity-30 group-hover/image:opacity-50 transition-all duration-700 animate-pulse"></div>
                 
-                {/* Glass card container */}
-                <div className="relative overflow-hidden rounded-2xl backdrop-blur-2xl bg-white/75 border border-purple-200/50 p-3 sm:p-4 md:p-6 shadow-2xl">
+                {/* Glass card container - Reduced padding and height */}
+                <div className="relative overflow-hidden rounded-2xl backdrop-blur-2xl bg-white/75 border border-purple-200/50 p-2 sm:p-3 md:p-4 shadow-2xl h-full flex flex-col justify-center">
                   {/* Gradient overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-100/20 via-transparent to-purple-200/20 opacity-0 group-hover/image:opacity-100 transition-opacity duration-700"></div>
                   
-                  {/* Image container */}
+                  {/* Image container - Reduced height to match entry fee card */}
                   <div className="relative">
                     {isLoading ? (
-                      <div className="w-full h-32 sm:h-40 md:h-48 lg:h-56 bg-gradient-to-r from-purple-200 to-purple-300 rounded-lg animate-pulse"></div>
+                      <div className="w-full h-48 sm:h-56 md:h-64 bg-gradient-to-r from-purple-200 to-purple-300 rounded-lg animate-pulse"></div>
                     ) : displayImage ? (
                       <img 
                         src={displayImage}
                         alt={displayPrize}
-                        className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-contain transform group-hover/image:scale-105 transition-transform duration-700"
+                        className="w-full h-48 sm:h-56 md:h-64 object-contain transform group-hover/image:scale-105 transition-transform duration-700"
                       />
                     ) : (
-                      <div className="w-full h-32 sm:h-40 md:h-48 lg:h-56 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center">
-                        <Trophy className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 text-white opacity-50" />
+                      <div className="w-full h-48 sm:h-56 md:h-64 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center">
+                        <Trophy className="w-16 h-16 sm:w-20 sm:h-20 text-white opacity-50" />
                       </div>
                     )}
                   </div>
                   
                   {/* Bottom gradient fade */}
-                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-white/90 via-purple-50/30 to-transparent pointer-events-none"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-12 sm:h-16 bg-gradient-to-t from-white/90 via-purple-50/30 to-transparent pointer-events-none"></div>
                 </div>
               </div>
             </div>
