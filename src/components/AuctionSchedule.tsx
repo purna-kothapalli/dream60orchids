@@ -51,7 +51,7 @@ export function AuctionSchedule() {
     return {
       time: timeStr,
       hour: auctionHour,
-      status: auction.Status.toLowerCase(),
+      status: auction.Status?.toLowerCase() || 'upcoming',
       prize: {
         name: auction.auctionName,
         value: auction.prizeValue,
