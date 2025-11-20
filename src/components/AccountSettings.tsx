@@ -94,7 +94,7 @@ export function AccountSettings({ user, onBack, onNavigate, onDeleteAccount, onL
       }
 
       // Call API to mark account as deleted (isDeleted: true)
-      const res = await fetch("https://dev-api.dream60.com/auth/me", {
+      const res = await fetch("http://localhost:5000/auth/me", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
